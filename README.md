@@ -725,27 +725,27 @@ fake_hal/
 ┌────────────────────────▼─────────────────────────────────────┐
 │              android.hardware.camera.provider-fake           │
 │                                                              │
-│  ┌─────────────────┐  ┌──────────────┐  ┌────────────────┐  │
-│  │ VideoFrameReader│  │MetadataRand. │  │   GyroWarp     │  │
-│  │  MP4 → NV21     │  │ISO/exp/AWB   │  │  IIO→Warp/Crop │  │
-│  └────────┬────────┘  └──────┬───────┘  └───────┬────────┘  │
+│  ┌─────────────────┐  ┌──────────────┐  ┌────────────────┐   │
+│  │ VideoFrameReader│  │MetadataRand. │  │   GyroWarp     │   │
+│  │  MP4 → NV21     │  │ISO/exp/AWB   │  │  IIO→Warp/Crop │   │
+│  └────────┬────────┘  └──────┬───────┘  └───────┬────────┘   │ 
 │           │                  │                   │           │
 │  ┌────────▼──────────────────▼───────────────────▼────────┐  │
 │  │              FakeCameraDeviceSession                   │  │
-│  │    processOneRequest() → fillYUVBuffer() → gralloc    │  │
+│  │    processOneRequest() → fillYUVBuffer() → gralloc     │  │
 │  │         + NoiseOverlay + LensShading + RollingShutter  │  │
-│  │         + JpegEncoder (libjpeg-turbo + EXIF)          │  │
+│  │         + JpegEncoder (libjpeg-turbo + EXIF)           │  │
 │  └────────────────────────────────────────────────────────┘  │
 │                          │                                   │
-│  ┌───────────────────────▼──────────────────────────────┐   │
-│  │              GrallocHelper (auto-detect)              │   │
-│  │  gralloc4 (IMapper 4.0) → gralloc3 → mmap fallback  │   │
-│  └──────────────────────────────────────────────────────┘   │
+│  ┌───────────────────────▼──────────────────────────────┐    │
+│  │              GrallocHelper (auto-detect)             │    │
+│  │  gralloc4 (IMapper 4.0) → gralloc3 → mmap fallback   │    │
+│  └──────────────────────────────────────────────────────┘    │
 └──────────────────────────────────────────────────────────────┘
                          │ KernelSU + SUSFS overlay
 ┌────────────────────────▼─────────────────────────────────────┐
 │                   /vendor раздел                             │
-│  Скрыт через SUSFS: bind mounts не видны в /proc/mounts     │
+│  Скрыт через SUSFS: bind mounts не видны в /proc/mounts      │
 └──────────────────────────────────────────────────────────────┘
 ```
 
