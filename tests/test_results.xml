@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="30" failures="0" disabled="0" errors="0" time="0.081" timestamp="2026-04-05T17:28:38.241" name="AllTests">
+  <testsuite name="MetadataRandomizerTest" tests="7" failures="0" disabled="0" skipped="0" errors="0" time="0.048" timestamp="2026-04-05T17:28:38.241">
+    <testcase name="ISOWithinRange" file="/home/user/workspace/fake_hal/tests/test_metadata_randomizer.cpp" line="12" status="run" result="completed" time="0.013" timestamp="2026-04-05T17:28:38.241" classname="MetadataRandomizerTest" />
+    <testcase name="ExposureTimeWithinRange" file="/home/user/workspace/fake_hal/tests/test_metadata_randomizer.cpp" line="27" status="run" result="completed" time="0.013" timestamp="2026-04-05T17:28:38.255" classname="MetadataRandomizerTest" />
+    <testcase name="AWBGainsReasonable" file="/home/user/workspace/fake_hal/tests/test_metadata_randomizer.cpp" line="42" status="run" result="completed" time="0.013" timestamp="2026-04-05T17:28:38.268" classname="MetadataRandomizerTest" />
+    <testcase name="ValuesActuallyDrift" file="/home/user/workspace/fake_hal/tests/test_metadata_randomizer.cpp" line="60" status="run" result="completed" time="0.002" timestamp="2026-04-05T17:28:38.281" classname="MetadataRandomizerTest" />
+    <testcase name="TimestampMonotonicallyIncreasing" file="/home/user/workspace/fake_hal/tests/test_metadata_randomizer.cpp" line="85" status="run" result="completed" time="0.002" timestamp="2026-04-05T17:28:38.284" classname="MetadataRandomizerTest" />
+    <testcase name="FrameDurationReasonable" file="/home/user/workspace/fake_hal/tests/test_metadata_randomizer.cpp" line="101" status="run" result="completed" time="0.002" timestamp="2026-04-05T17:28:38.287" classname="MetadataRandomizerTest" />
+    <testcase name="RollingShutterSkewPositive" file="/home/user/workspace/fake_hal/tests/test_metadata_randomizer.cpp" line="116" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.289" classname="MetadataRandomizerTest" />
+  </testsuite>
+  <testsuite name="NoiseOverlayTest" tests="5" failures="0" disabled="0" skipped="0" errors="0" time="0.014" timestamp="2026-04-05T17:28:38.290">
+    <testcase name="PixelsActuallyChange" file="/home/user/workspace/fake_hal/tests/test_noise_overlay.cpp" line="40" status="run" result="completed" time="0.002" timestamp="2026-04-05T17:28:38.290" classname="NoiseOverlayTest" />
+    <testcase name="DarkPixelsHaveMoreNoise" file="/home/user/workspace/fake_hal/tests/test_noise_overlay.cpp" line="58" status="run" result="completed" time="0.003" timestamp="2026-04-05T17:28:38.292" classname="NoiseOverlayTest" />
+    <testcase name="ValuesClampedTo0_255" file="/home/user/workspace/fake_hal/tests/test_noise_overlay.cpp" line="87" status="run" result="completed" time="0.003" timestamp="2026-04-05T17:28:38.295" classname="NoiseOverlayTest" />
+    <testcase name="FPNStableWithSameSeed" file="/home/user/workspace/fake_hal/tests/test_noise_overlay.cpp" line="109" status="run" result="completed" time="0.002" timestamp="2026-04-05T17:28:38.299" classname="NoiseOverlayTest" />
+    <testcase name="HigherISOMoreNoise" file="/home/user/workspace/fake_hal/tests/test_noise_overlay.cpp" line="139" status="run" result="completed" time="0.002" timestamp="2026-04-05T17:28:38.301" classname="NoiseOverlayTest" />
+  </testsuite>
+  <testsuite name="GyroWarpTest" tests="7" failures="0" disabled="0" skipped="0" errors="0" time="0." timestamp="2026-04-05T17:28:38.304">
+    <testcase name="ZeroAnglesNoChange" file="/home/user/workspace/fake_hal/tests/test_gyro_warp.cpp" line="32" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.304" classname="GyroWarpTest" />
+    <testcase name="ShiftRightMovesPixels" file="/home/user/workspace/fake_hal/tests/test_gyro_warp.cpp" line="48" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.304" classname="GyroWarpTest" />
+    <testcase name="ShiftProportionalToAngle" file="/home/user/workspace/fake_hal/tests/test_gyro_warp.cpp" line="67" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.304" classname="GyroWarpTest" />
+    <testcase name="BoundaryClampsToEdge" file="/home/user/workspace/fake_hal/tests/test_gyro_warp.cpp" line="94" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.304" classname="GyroWarpTest" />
+    <testcase name="NegativeShiftMovesLeft" file="/home/user/workspace/fake_hal/tests/test_gyro_warp.cpp" line="111" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.304" classname="GyroWarpTest" />
+    <testcase name="VerticalShiftWorks" file="/home/user/workspace/fake_hal/tests/test_gyro_warp.cpp" line="127" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.305" classname="GyroWarpTest" />
+    <testcase name="UVPlaneShifts" file="/home/user/workspace/fake_hal/tests/test_gyro_warp.cpp" line="149" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.305" classname="GyroWarpTest" />
+  </testsuite>
+  <testsuite name="JpegEncoderTest" tests="7" failures="0" disabled="0" skipped="0" errors="0" time="0.006" timestamp="2026-04-05T17:28:38.305">
+    <testcase name="StartsWithSOI" file="/home/user/workspace/fake_hal/tests/test_jpeg_encoder.cpp" line="48" status="run" result="completed" time="0.005" timestamp="2026-04-05T17:28:38.305" classname="JpegEncoderTest" />
+    <testcase name="ContainsAPP1Exif" file="/home/user/workspace/fake_hal/tests/test_jpeg_encoder.cpp" line="60" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.310" classname="JpegEncoderTest" />
+    <testcase name="ExifContainsCorrectISO" file="/home/user/workspace/fake_hal/tests/test_jpeg_encoder.cpp" line="81" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.310" classname="JpegEncoderTest" />
+    <testcase name="DecodesBackCorrectly" file="/home/user/workspace/fake_hal/tests/test_jpeg_encoder.cpp" line="108" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.310" classname="JpegEncoderTest" />
+    <testcase name="SizeReasonable" file="/home/user/workspace/fake_hal/tests/test_jpeg_encoder.cpp" line="150" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.310" classname="JpegEncoderTest" />
+    <testcase name="QualityAffectsSize" file="/home/user/workspace/fake_hal/tests/test_jpeg_encoder.cpp" line="163" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.310" classname="JpegEncoderTest" />
+    <testcase name="EndsWithEOI" file="/home/user/workspace/fake_hal/tests/test_jpeg_encoder.cpp" line="176" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.311" classname="JpegEncoderTest" />
+  </testsuite>
+  <testsuite name="PipelineIntegrationTest" tests="4" failures="0" disabled="0" skipped="0" errors="0" time="0.011" timestamp="2026-04-05T17:28:38.311">
+    <testcase name="FullPipelineProducesValidJPEG" file="/home/user/workspace/fake_hal/tests/test_pipeline_integration.cpp" line="50" status="run" result="completed" time="0.009" timestamp="2026-04-05T17:28:38.311" classname="PipelineIntegrationTest" />
+    <testcase name="MetadataFilledAndRealistic" file="/home/user/workspace/fake_hal/tests/test_pipeline_integration.cpp" line="114" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.321" classname="PipelineIntegrationTest" />
+    <testcase name="LensShadingVignettes" file="/home/user/workspace/fake_hal/tests/test_pipeline_integration.cpp" line="153" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.321" classname="PipelineIntegrationTest" />
+    <testcase name="RollingShutterAppliesPerRowShift" file="/home/user/workspace/fake_hal/tests/test_pipeline_integration.cpp" line="174" status="run" result="completed" time="0." timestamp="2026-04-05T17:28:38.322" classname="PipelineIntegrationTest" />
+  </testsuite>
+</testsuites>

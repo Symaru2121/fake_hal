@@ -1,0 +1,17 @@
+
+build_android/
+build_production/
+*.o
+*.o.d
+*.a
+*.so
+
+cmdline-tools.zip
+*.zip
+
+.DS_Store
+__MACOSX/
+
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,108 @@
+
+
+cc_binary {
+    name: "android.hardware.camera.provider-fake",
+
+    srcs: [
+        "src/main.cpp",
+        "src/FakeCameraProvider.cpp",
+        "src/FakeCameraDevice.cpp",
+        "src/VideoFrameReader.cpp",
+        "src/MetadataRandomizer.cpp",
+        "src/NoiseOverlay.cpp",
+        "src/GyroWarp.cpp",
+        "src/JpegEncoder.cpp",
+        "src/GrallocHelper.cpp",
+    ],
+
+    local_include_dirs: ["include"],
+
+    shared_libs: [
+
+        "android.hardware.camera.provider-V1-ndk",
+        "android.hardware.camera.device-V1-ndk",
+        "android.hardware.camera.common-V1-ndk",
+
+
+        "libbinder_ndk",
+        "libbase",
+        "liblog",
+        "libutils",
+        "libcutils",
+
+
+        "libcamera_metadata",
+
+
+        "libmediandk",
+
+
+        "libjpeg",
+
+
+        "libhardware",
+        "libnativewindow",
+        "libvndksupport",
+
+
+        "android.hardware.graphics.mapper@4.0",
+
+
+        "android.hardware.graphics.mapper@3.0",
+
+
+        "libhidlbase",
+    ],
+
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-std=c++17",
+        "-O2",
+
+        "-fvisibility=hidden",
+
+        "-fstack-protector-strong",
+    ],
+
+
+    vendor: true,
+
+
+    init_rc: ["fake_camera_hal.rc"],
+    vintf_fragments: ["fake_camera_hal.xml"],
+}
+
+
+cc_library_static {
+    name: "libfake_hal_core",
+
+    srcs: [
+        "src/VideoFrameReader.cpp",
+        "src/MetadataRandomizer.cpp",
+        "src/NoiseOverlay.cpp",
+        "src/GyroWarp.cpp",
+        "src/JpegEncoder.cpp",
+        "src/GrallocHelper.cpp",
+    ],
+
+    local_include_dirs: ["include"],
+
+    shared_libs: [
+        "libmediandk",
+        "libcamera_metadata",
+        "libjpeg",
+        "liblog",
+        "libbase",
+        "libcutils",
+        "libhardware",
+        "libnativewindow",
+        "android.hardware.graphics.mapper@4.0",
+        "android.hardware.graphics.mapper@3.0",
+        "libhidlbase",
+    ],
+
+    vendor: true,
+    cflags: ["-std=c++17", "-O2"],
+}

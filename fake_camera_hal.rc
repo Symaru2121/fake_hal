@@ -1,0 +1,23 @@
+
+
+service fake_camera_hal /vendor/bin/hw/android.hardware.camera.provider-fake \
+    /data/local/tmp/fake_video.mp4
+    class hal
+    user cameraserver
+    group camera media_rw sdcard_r
+    capabilities SYS_NICE
+    ioprio rt 4
+    task_profiles CameraServiceCapacity
+
+    oneshot
+
+
+    stdio_to_kmsg
+
+on property:sys.boot_completed=1
+    start fake_camera_hal
+
+
+on property:fake_hal.video_path=*
+    setprop vendor.camera.fake_video ${fake_hal.video_path}
+    restart fake_camera_hal

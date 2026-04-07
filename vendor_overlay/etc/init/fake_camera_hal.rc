@@ -1,0 +1,7 @@
+service fake_camera_hal /vendor/bin/fake_hal_main /data/local/tmp/fake_video.mp4
+    class hal
+    user cameraserver
+    group cameraserver
+    capabilities SYS_NICE
+    writepid /dev/cpuset/camera-daemon/tasks
+    task_profiles CameraService

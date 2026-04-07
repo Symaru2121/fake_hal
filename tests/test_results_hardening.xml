@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="66" failures="0" disabled="0" errors="0" time="2.562" timestamp="2026-04-05T18:07:38.474" name="AllTests">
+  <testsuite name="MetadataRandomizerTest" tests="7" failures="0" disabled="0" skipped="0" errors="0" time="0.032" timestamp="2026-04-05T18:07:38.474">
+    <testcase name="ISOWithinRange" file="/home/user/workspace/fake_hal/tests/test_metadata_randomizer.cpp" line="12" status="run" result="completed" time="0.008" timestamp="2026-04-05T18:07:38.474" classname="MetadataRandomizerTest" />
+    <testcase name="ExposureTimeWithinRange" file="/home/user/workspace/fake_hal/tests/test_metadata_randomizer.cpp" line="27" status="run" result="completed" time="0.008" timestamp="2026-04-05T18:07:38.483" classname="MetadataRandomizerTest" />
+    <testcase name="AWBGainsReasonable" file="/home/user/workspace/fake_hal/tests/test_metadata_randomizer.cpp" line="42" status="run" result="completed" time="0.009" timestamp="2026-04-05T18:07:38.492" classname="MetadataRandomizerTest" />
+    <testcase name="ValuesActuallyDrift" file="/home/user/workspace/fake_hal/tests/test_metadata_randomizer.cpp" line="60" status="run" result="completed" time="0.001" timestamp="2026-04-05T18:07:38.501" classname="MetadataRandomizerTest" />
+    <testcase name="TimestampMonotonicallyIncreasing" file="/home/user/workspace/fake_hal/tests/test_metadata_randomizer.cpp" line="85" status="run" result="completed" time="0.001" timestamp="2026-04-05T18:07:38.503" classname="MetadataRandomizerTest" />
+    <testcase name="FrameDurationReasonable" file="/home/user/workspace/fake_hal/tests/test_metadata_randomizer.cpp" line="101" status="run" result="completed" time="0.001" timestamp="2026-04-05T18:07:38.505" classname="MetadataRandomizerTest" />
+    <testcase name="RollingShutterSkewPositive" file="/home/user/workspace/fake_hal/tests/test_metadata_randomizer.cpp" line="116" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.507" classname="MetadataRandomizerTest" />
+  </testsuite>
+  <testsuite name="NoiseOverlayTest" tests="9" failures="0" disabled="0" skipped="0" errors="0" time="0.022" timestamp="2026-04-05T18:07:38.507">
+    <testcase name="PixelsActuallyChange" file="/home/user/workspace/fake_hal/tests/test_noise_overlay.cpp" line="41" status="run" result="completed" time="0.001" timestamp="2026-04-05T18:07:38.507" classname="NoiseOverlayTest" />
+    <testcase name="DarkPixelsHaveMoreNoise" file="/home/user/workspace/fake_hal/tests/test_noise_overlay.cpp" line="59" status="run" result="completed" time="0.002" timestamp="2026-04-05T18:07:38.508" classname="NoiseOverlayTest" />
+    <testcase name="ValuesClampedTo0_255" file="/home/user/workspace/fake_hal/tests/test_noise_overlay.cpp" line="88" status="run" result="completed" time="0.004" timestamp="2026-04-05T18:07:38.511" classname="NoiseOverlayTest" />
+    <testcase name="FPNStableWithSameSeed" file="/home/user/workspace/fake_hal/tests/test_noise_overlay.cpp" line="110" status="run" result="completed" time="0.002" timestamp="2026-04-05T18:07:38.515" classname="NoiseOverlayTest" />
+    <testcase name="HigherISOMoreNoise" file="/home/user/workspace/fake_hal/tests/test_noise_overlay.cpp" line="140" status="run" result="completed" time="0.002" timestamp="2026-04-05T18:07:38.517" classname="NoiseOverlayTest" />
+    <testcase name="FPNUniquePerDevice" file="/home/user/workspace/fake_hal/tests/test_noise_overlay.cpp" line="159" status="run" result="completed" time="0.003" timestamp="2026-04-05T18:07:38.520" classname="NoiseOverlayTest" />
+    <testcase name="FPNStableForSameSerial" file="/home/user/workspace/fake_hal/tests/test_noise_overlay.cpp" line="180" status="run" result="completed" time="0.002" timestamp="2026-04-05T18:07:38.523" classname="NoiseOverlayTest" />
+    <testcase name="RowFPNApplied" file="/home/user/workspace/fake_hal/tests/test_noise_overlay.cpp" line="202" status="run" result="completed" time="0.001" timestamp="2026-04-05T18:07:38.526" classname="NoiseOverlayTest" />
+    <testcase name="HotDeadPixelsPresent" file="/home/user/workspace/fake_hal/tests/test_noise_overlay.cpp" line="225" status="run" result="completed" time="0.001" timestamp="2026-04-05T18:07:38.527" classname="NoiseOverlayTest" />
+  </testsuite>
+  <testsuite name="GyroWarpTest" tests="7" failures="0" disabled="0" skipped="0" errors="0" time="0." timestamp="2026-04-05T18:07:38.529">
+    <testcase name="ZeroAnglesNoChange" file="/home/user/workspace/fake_hal/tests/test_gyro_warp.cpp" line="32" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.529" classname="GyroWarpTest" />
+    <testcase name="ShiftRightMovesPixels" file="/home/user/workspace/fake_hal/tests/test_gyro_warp.cpp" line="48" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.529" classname="GyroWarpTest" />
+    <testcase name="ShiftProportionalToAngle" file="/home/user/workspace/fake_hal/tests/test_gyro_warp.cpp" line="67" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.529" classname="GyroWarpTest" />
+    <testcase name="BoundaryClampsToEdge" file="/home/user/workspace/fake_hal/tests/test_gyro_warp.cpp" line="94" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.529" classname="GyroWarpTest" />
+    <testcase name="NegativeShiftMovesLeft" file="/home/user/workspace/fake_hal/tests/test_gyro_warp.cpp" line="111" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.529" classname="GyroWarpTest" />
+    <testcase name="VerticalShiftWorks" file="/home/user/workspace/fake_hal/tests/test_gyro_warp.cpp" line="127" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.530" classname="GyroWarpTest" />
+    <testcase name="UVPlaneShifts" file="/home/user/workspace/fake_hal/tests/test_gyro_warp.cpp" line="149" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.530" classname="GyroWarpTest" />
+  </testsuite>
+  <testsuite name="JpegEncoderTest" tests="7" failures="0" disabled="0" skipped="0" errors="0" time="0." timestamp="2026-04-05T18:07:38.530">
+    <testcase name="StartsWithSOI" file="/home/user/workspace/fake_hal/tests/test_jpeg_encoder.cpp" line="48" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.530" classname="JpegEncoderTest" />
+    <testcase name="ContainsAPP1Exif" file="/home/user/workspace/fake_hal/tests/test_jpeg_encoder.cpp" line="60" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.530" classname="JpegEncoderTest" />
+    <testcase name="ExifContainsCorrectISO" file="/home/user/workspace/fake_hal/tests/test_jpeg_encoder.cpp" line="81" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.530" classname="JpegEncoderTest" />
+    <testcase name="DecodesBackCorrectly" file="/home/user/workspace/fake_hal/tests/test_jpeg_encoder.cpp" line="108" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.530" classname="JpegEncoderTest" />
+    <testcase name="SizeReasonable" file="/home/user/workspace/fake_hal/tests/test_jpeg_encoder.cpp" line="150" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.530" classname="JpegEncoderTest" />
+    <testcase name="QualityAffectsSize" file="/home/user/workspace/fake_hal/tests/test_jpeg_encoder.cpp" line="163" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.530" classname="JpegEncoderTest" />
+    <testcase name="EndsWithEOI" file="/home/user/workspace/fake_hal/tests/test_jpeg_encoder.cpp" line="176" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.531" classname="JpegEncoderTest" />
+  </testsuite>
+  <testsuite name="PipelineIntegrationTest" tests="4" failures="0" disabled="0" skipped="0" errors="0" time="0.007" timestamp="2026-04-05T18:07:38.531">
+    <testcase name="FullPipelineProducesValidJPEG" file="/home/user/workspace/fake_hal/tests/test_pipeline_integration.cpp" line="50" status="run" result="completed" time="0.006" timestamp="2026-04-05T18:07:38.531" classname="PipelineIntegrationTest" />
+    <testcase name="MetadataFilledAndRealistic" file="/home/user/workspace/fake_hal/tests/test_pipeline_integration.cpp" line="114" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.537" classname="PipelineIntegrationTest" />
+    <testcase name="LensShadingVignettes" file="/home/user/workspace/fake_hal/tests/test_pipeline_integration.cpp" line="153" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.537" classname="PipelineIntegrationTest" />
+    <testcase name="RollingShutterAppliesPerRowShift" file="/home/user/workspace/fake_hal/tests/test_pipeline_integration.cpp" line="174" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.538" classname="PipelineIntegrationTest" />
+  </testsuite>
+  <testsuite name="HALIntegrationTest" tests="20" failures="0" disabled="0" skipped="0" errors="0" time="1.353" timestamp="2026-04-05T18:07:38.538">
+    <testcase name="SetCallbackSucceeds" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="202" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.538" classname="HALIntegrationTest" />
+    <testcase name="GetCameraIdListReturnsTwoCameras" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="210" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.538" classname="HALIntegrationTest" />
+    <testcase name="GetCameraDeviceInterface" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="222" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.538" classname="HALIntegrationTest" />
+    <testcase name="CameraCharacteristicsBack" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="238" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.539" classname="HALIntegrationTest" />
+    <testcase name="CameraCharacteristicsFront" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="272" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:38.539" classname="HALIntegrationTest" />
+    <testcase name="OpenSessionAndConfigureStreams" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="289" status="run" result="completed" time="0.01" timestamp="2026-04-05T18:07:38.539" classname="HALIntegrationTest" />
+    <testcase name="ProcessCaptureRequestAndReceiveResults" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="312" status="run" result="completed" time="0.345" timestamp="2026-04-05T18:07:38.550" classname="HALIntegrationTest" />
+    <testcase name="CaptureResultMetadataValid" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="359" status="run" result="completed" time="0.256" timestamp="2026-04-05T18:07:38.895" classname="HALIntegrationTest" />
+    <testcase name="FlushReturnsOK" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="424" status="run" result="completed" time="0.01" timestamp="2026-04-05T18:07:39.151" classname="HALIntegrationTest" />
+    <testcase name="CloseSessionCleanly" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="438" status="run" result="completed" time="0.152" timestamp="2026-04-05T18:07:39.162" classname="HALIntegrationTest" />
+    <testcase name="SequentialSessions" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="459" status="run" result="completed" time="0.327" timestamp="2026-04-05T18:07:39.315" classname="HALIntegrationTest" />
+    <testcase name="IndependentCameraSessions" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="506" status="run" result="completed" time="0.237" timestamp="2026-04-05T18:07:39.642" classname="HALIntegrationTest" />
+    <testcase name="GetVendorTagsEmpty" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="551" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:39.880" classname="HALIntegrationTest" />
+    <testcase name="NotifyDeviceStateChange" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="561" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:39.880" classname="HALIntegrationTest" />
+    <testcase name="GetResourceCost" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="569" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:39.880" classname="HALIntegrationTest" />
+    <testcase name="StreamCombinationSupported" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="581" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:39.880" classname="HALIntegrationTest" />
+    <testcase name="SetTorchMode" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="593" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:39.880" classname="HALIntegrationTest" />
+    <testcase name="ConstructDefaultRequestSettings" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="715" status="run" result="completed" time="0.011" timestamp="2026-04-05T18:07:39.881" classname="HALIntegrationTest" />
+    <testcase name="GetConcurrentCameraIds" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="738" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:39.892" classname="HALIntegrationTest" />
+    <testcase name="ConcurrentStreamCombinationNotSupported" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="748" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:39.892" classname="HALIntegrationTest" />
+  </testsuite>
+  <testsuite name="VideoReaderFallbackTest" tests="3" failures="0" disabled="0" skipped="0" errors="0" time="0." timestamp="2026-04-05T18:07:39.892">
+    <testcase name="OpenNonexistentFileFails" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="604" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:39.892" classname="VideoReaderFallbackTest" />
+    <testcase name="LastFrameBeforeOpenReturnsEmpty" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="612" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:39.892" classname="VideoReaderFallbackTest" />
+    <testcase name="NextFrameBeforeOpenReturnsFalse" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="621" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:39.892" classname="VideoReaderFallbackTest" />
+  </testsuite>
+  <testsuite name="HALPerformanceTest" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="1.104" timestamp="2026-04-05T18:07:39.892">
+    <testcase name="CaptureRequestThroughput" file="/home/user/workspace/fake_hal/tests/test_hal_integration.cpp" line="637" status="run" result="completed" time="1.104" timestamp="2026-04-05T18:07:39.892" classname="HALPerformanceTest" />
+  </testsuite>
+  <testsuite name="TimestampSyncTest" tests="8" failures="0" disabled="0" skipped="0" errors="0" time="0.039" timestamp="2026-04-05T18:07:40.997">
+    <testcase name="ExposureStartAfterMarkFrameStart" file="/home/user/workspace/fake_hal/tests/test_timestamp_sync.cpp" line="8" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:40.997" classname="TimestampSyncTest" />
+    <testcase name="FrameDurationMeasured" file="/home/user/workspace/fake_hal/tests/test_timestamp_sync.cpp" line="22" status="run" result="completed" time="0.033" timestamp="2026-04-05T18:07:40.997" classname="TimestampSyncTest" />
+    <testcase name="IMUCorrelationInWindow" file="/home/user/workspace/fake_hal/tests/test_timestamp_sync.cpp" line="35" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:41.030" classname="TimestampSyncTest" />
+    <testcase name="IMUCorrelationOutsideWindow" file="/home/user/workspace/fake_hal/tests/test_timestamp_sync.cpp" line="49" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:41.030" classname="TimestampSyncTest" />
+    <testcase name="DefaultFrameDuration" file="/home/user/workspace/fake_hal/tests/test_timestamp_sync.cpp" line="64" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:41.030" classname="TimestampSyncTest" />
+    <testcase name="ExposureStartMonotonic" file="/home/user/workspace/fake_hal/tests/test_timestamp_sync.cpp" line="71" status="run" result="completed" time="0.005" timestamp="2026-04-05T18:07:41.030" classname="TimestampSyncTest" />
+    <testcase name="IMUCorrelationAfterWindow" file="/home/user/workspace/fake_hal/tests/test_timestamp_sync.cpp" line="85" status="run" result="completed" time="0." timestamp="2026-04-05T18:07:41.035" classname="TimestampSyncTest" />
+    <testcase name="FrameDurationClamped" file="/home/user/workspace/fake_hal/tests/test_timestamp_sync.cpp" line="100" status="run" result="completed" time="0.001" timestamp="2026-04-05T18:07:41.035" classname="TimestampSyncTest" />
+  </testsuite>
+</testsuites>

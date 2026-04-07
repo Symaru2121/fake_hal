@@ -1,0 +1,43 @@
+name: CI Unit Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake g++ build-essential
+
+    - name: Configure CMake (tests)
+      run: |
+        cd tests
+        cmake -B build -DCMAKE_BUILD_TYPE=Debug
+
+    - name: Build tests
+      run: |
+        cd tests
+        cmake --build build -j$(nproc)
+
+    - name: Run tests
+      run: |
+        cd tests/build
+        ./run_tests --gtest_output=xml:test_results.xml
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: tests/build/test_results.xml

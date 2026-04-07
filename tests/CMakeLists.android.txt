@@ -1,0 +1,115 @@
+cmake_minimum_required(VERSION 3.16)
+project(fake_hal_tests)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/v1.14.0.tar.gz
+)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+
+set(MOCK_INCLUDES
+    ${CMAKE_CURRENT_SOURCE_DIR}/mocks/aidl
+    ${CMAKE_CURRENT_SOURCE_DIR}/mocks
+)
+
+
+add_library(jpeg SHARED IMPORTED)
+set_target_properties(jpeg PROPERTIES
+    IMPORTED_LOCATION "/system/lib64/libjpeg.so"
+    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/mocks"
+)
+
+
+add_library(fake_hal_core STATIC
+    ../src/MetadataRandomizer.cpp
+    ../src/NoiseOverlay.cpp
+    ../src/GyroWarp.cpp
+    ../src/JpegEncoder.cpp
+)
+
+target_include_directories(fake_hal_core PUBLIC
+    ../include
+    ${MOCK_INCLUDES}
+)
+
+target_link_libraries(fake_hal_core PUBLIC jpeg)
+
+target_compile_options(fake_hal_core PRIVATE
+    -Wno-unused-parameter
+    -Wno-unused-function
+    -Wno-unused-variable
+)
+
+target_compile_definitions(fake_hal_core PRIVATE
+    -DFAKE_HAL_TEST_BUILD
+)
+
+
+add_library(fake_hal_full STATIC
+    ../src/FakeCameraDevice.cpp
+    ../src/FakeCameraProvider.cpp
+    ../src/VideoFrameReader.cpp
+    ../src/GrallocHelper.cpp
+    ../src/TimestampSync.cpp
+)
+
+target_include_directories(fake_hal_full PUBLIC
+    ../include
+    ${MOCK_INCLUDES}
+)
+
+target_link_libraries(fake_hal_full PUBLIC
+    fake_hal_core
+    jpeg
+)
+
+target_compile_options(fake_hal_full PRIVATE
+    -Wno-unused-parameter
+    -Wno-unused-function
+    -Wno-unused-variable
+    -Wno-missing-field-initializers
+)
+
+target_compile_definitions(fake_hal_full PRIVATE
+    -DFAKE_HAL_TEST_BUILD
+)
+
+
+add_executable(run_tests
+    test_metadata_randomizer.cpp
+    test_noise_overlay.cpp
+    test_gyro_warp.cpp
+    test_jpeg_encoder.cpp
+    test_pipeline_integration.cpp
+    test_hal_integration.cpp
+    test_timestamp_sync.cpp
+    test_gralloc_integration.cpp
+)
+
+target_include_directories(run_tests PRIVATE
+    ../include
+    ${MOCK_INCLUDES}
+)
+
+target_link_libraries(run_tests
+    fake_hal_full
+    GTest::gtest_main
+    jpeg
+)
+
+target_compile_options(run_tests PRIVATE
+    -Wno-unused-parameter
+    -Wno-unused-function
+    -Wno-unused-variable
+    -Wno-missing-field-initializers
+)
+
+include(GoogleTest)
+gtest_discover_tests(run_tests)

@@ -1,0 +1,15 @@
+
+
+allow hal_camera shell_data_file:dir { open read search getattr };
+allow hal_camera shell_data_file:file { open read getattr map };
+
+
+allow hal_camera sysfs_iio:dir { open read search };
+allow hal_camera sysfs_iio:file { open read getattr };
+
+
+allow hal_camera fake_hal_log:file { create open write append getattr };
+
+
+allow hal_camera vendor_data_file:dir { open read search getattr };
+allow hal_camera vendor_data_file:file { open read getattr };

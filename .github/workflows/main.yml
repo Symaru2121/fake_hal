@@ -1,0 +1,101 @@
+name: Build FakeHAL with AOSP
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout FakeHAL
+      uses: actions/checkout@v4
+      with:
+        path: fake_hal
+
+    - name: Setup AOSP environment
+      run: |
+        export AOSP_ROOT=$HOME/aosp
+        mkdir -p $AOSP_ROOT
+        cd $AOSP_ROOT
+
+
+        repo init -u https://android.googlesource.com/platform/manifest -b android-14.0.0_r1
+
+
+        repo sync -c -j$(nproc) --no-tags --no-clone-bundle \
+          platform/frameworks/av \
+          platform/frameworks/native \
+          platform/system/core \
+          platform/hardware/interfaces \
+          device/google/panther \
+          device/google/tensor
+
+    - name: Copy FakeHAL to AOSP
+      run: |
+        export AOSP_ROOT=$HOME/aosp
+        mkdir -p $AOSP_ROOT/vendor/fake_hal
+        cp -r fake_hal/* $AOSP_ROOT/vendor/fake_hal/
+
+
+        cat > $AOSP_ROOT/vendor/fake_hal/Android.bp << 'EOF'
+        cc_binary {
+            name: "fake_hal_main",
+            srcs: [
+                "src/main.cpp",
+                "src/FakeCameraProvider.cpp",
+                "src/FakeCameraDevice.cpp",
+                "src/VideoFrameReader.cpp",
+                "src/GrallocHelper.cpp",
+                "src/TimestampSync.cpp",
+                "src/MetadataRandomizer.cpp",
+                "src/NoiseOverlay.cpp",
+                "src/GyroWarp.cpp",
+                "src/JpegEncoder.cpp",
+            ],
+            include_dirs: [
+                "vendor/fake_hal/include",
+            ],
+            shared_libs: [
+                "libbinder",
+                "libcamera2ndk",
+                "libmediandk",
+                "libjpeg",
+                "liblog",
+                "libutils",
+                "libcutils",
+            ],
+            cflags: [
+                "-Wno-unused-parameter",
+                "-Wno-unused-function",
+                "-Wno-unused-variable",
+                "-Wno-missing-field-initializers",
+            ],
+        }
+        EOF
+
+    - name: Setup build environment
+      run: |
+        export AOSP_ROOT=$HOME/aosp
+        cd $AOSP_ROOT
+        source build/envsetup.sh
+        lunch aosp_panther-userdebug
+
+    - name: Build FakeHAL
+      run: |
+        export AOSP_ROOT=$HOME/aosp
+        cd $AOSP_ROOT
+        make fake_hal_main -j$(nproc)
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: fake-hal-binary
+        path: |
+          $HOME/aosp/out/target/product/panther/system/bin/fake_hal_main
+          $HOME/aosp/out/target/product/panther/system/lib64/libjpeg.so
+          $HOME/aosp/out/target/product/panther/system/lib64/libcamera2ndk.so

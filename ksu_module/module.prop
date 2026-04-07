@@ -1,0 +1,6 @@
+id=FakeHAL
+name=Fake Camera HAL Provider
+version=1.0
+versionCode=1
+author=soso
+description=Fake camera HAL that spoofs video feed from MP4 file
