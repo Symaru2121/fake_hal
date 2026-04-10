@@ -21,7 +21,10 @@ jobs:
     - name: Install build dependencies
       run: |
         sudo apt-get update -qq
-        sudo apt-get install -y -qq           openjdk-17-jdk python3 python3-pip git curl unzip           ccache build-essential zip rsync libncurses5           2>/dev/null || true
+        sudo apt-get install -y -qq \
+          openjdk-17-jdk python3 python3-pip git curl unzip \
+          ccache build-essential zip rsync libncurses5 \
+          2>/dev/null || true
 
     - name: Setup ccache
       run: |
@@ -36,21 +39,21 @@ jobs:
           curl -s https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
           chmod a+x ~/bin/repo
         fi
-        echo "/home/user/bin" >> 
+        echo "$HOME/bin" >> $GITHUB_PATH
 
     - name: Setup AOSP (if not cached)
       run: |
-        export AOSP_ROOT=/home/user/aosp
+        export AOSP_ROOT=$HOME/aosp
 
-        if [ ! -f "/build/envsetup.sh" ]; then
-          mkdir -p 
-          cd 
+        if [ ! -f "$AOSP_ROOT/build/envsetup.sh" ]; then
+          mkdir -p $AOSP_ROOT
+          cd $AOSP_ROOT
 
-          repo init -u https://android.googlesource.com/platform/manifest             -b android-14.0.0_r1 --depth=1
+          repo init -u https://android.googlesource.com/platform/manifest \
+            -b android-14.0.0_r1 --depth=1
 
-          # Full sync — selective sync causes missing deps
-          # First run takes hours, subsequent runs are cached
-          repo sync -c -j2 --no-tags --no-clone-bundle --optimized-fetch
+          # Full sync - first run takes hours, subsequent runs are cached
+          repo sync -c -j$(nproc) --no-tags --no-clone-bundle --optimized-fetch
         else
           echo "AOSP already present, skipping sync"
           echo "To force re-sync, remove ~/aosp/build/envsetup.sh"
@@ -58,36 +61,37 @@ jobs:
 
     - name: Copy FakeHAL to AOSP tree
       run: |
-        export AOSP_ROOT=/home/user/aosp
-        DEST="/vendor/fake_hal"
-        mkdir -p ""
-        rsync -a --delete fake_hal/ "/"           --exclude .git --exclude tests --exclude .github
+        export AOSP_ROOT=$HOME/aosp
+        DEST="$AOSP_ROOT/vendor/fake_hal"
+        mkdir -p "$DEST"
+        rsync -a --delete fake_hal/ "$DEST/" \
+          --exclude .git --exclude tests --exclude .github
 
     - name: Build FakeHAL binary
       run: |
-        export AOSP_ROOT=/home/user/aosp
+        export AOSP_ROOT=$HOME/aosp
         export USE_CCACHE=1
-        export CCACHE_DIR=/home/user/.ccache
-        cd 
+        export CCACHE_DIR=$HOME/.ccache
+        cd $AOSP_ROOT
 
         source build/envsetup.sh
         lunch aosp_panther-userdebug
 
         # Build only our module
-        m android.hardware.camera.provider-fake -j2
+        m android.hardware.camera.provider-fake -j$(nproc)
 
     - name: Collect build artifacts
       run: |
-        export AOSP_ROOT=/home/user/aosp
-        mkdir -p /artifacts
+        export AOSP_ROOT=$HOME/aosp
+        mkdir -p $GITHUB_WORKSPACE/artifacts
 
-        # Find the built binary
-        BINARY=$(find /out -name "android.hardware.camera.provider-fake"           -type f -executable 2>/dev/null | head -1)
+        BINARY=$(find $AOSP_ROOT/out -name "android.hardware.camera.provider-fake" \
+          -type f -executable 2>/dev/null | head -1)
 
         if [ -n "$BINARY" ]; then
-          cp "$BINARY" /artifacts/
+          cp "$BINARY" $GITHUB_WORKSPACE/artifacts/
           echo "Binary found: $BINARY"
-          ls -lh /artifacts/
+          ls -lh $GITHUB_WORKSPACE/artifacts/
         else
           echo "WARNING: Binary not found in AOSP output"
           exit 1
