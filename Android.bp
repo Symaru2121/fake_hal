@@ -33,7 +33,6 @@ cc_binary {
 
 
         "libcamera_metadata",
-        "libcamera_client",
 
 
         "libmediandk",
@@ -95,7 +94,6 @@ cc_library_static {
     shared_libs: [
         "libmediandk",
         "libcamera_metadata",
-        "libcamera_client",
         "libjpeg",
         "liblog",
         "libbase",

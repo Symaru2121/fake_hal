@@ -57,22 +57,16 @@ jobs:
           echo "AOSP already present, skipping sync"
         fi
 
-    - name: Patch AOSP for vendor HAL compatibility
+    - name: Prepare AOSP build environment
       run: |
         export AOSP_ROOT=$HOME/aosp
 
-        # Patch libcamera_client to be vendor_available
-        CAMERA_BP="$AOSP_ROOT/frameworks/av/camera/Android.bp"
-        if ! grep -q 'vendor_available: true' "$CAMERA_BP"; then
-          echo "Patching libcamera_client for vendor_available..."
-          sed -i '/name: "libcamera_client",/a\    vendor_available: true,' "$CAMERA_BP"
-          echo "Patched successfully"
-        else
-          echo "libcamera_client already patched"
-        fi
+        # Revert any previous patches to libcamera_client
+        cd $AOSP_ROOT
+        git -C frameworks/av checkout -- camera/Android.bp 2>/dev/null || true
 
-        # Clean soong intermediates for libcamera_client to pick up the change
-        rm -rf "$AOSP_ROOT/out/soong/.intermediates/frameworks/av/camera/libcamera_client" 2>/dev/null || true
+        # Clean stale intermediates for vendor/fake_hal
+        rm -rf "$AOSP_ROOT/out/soong/.intermediates/vendor/fake_hal" 2>/dev/null || true
 
     - name: Copy FakeHAL to AOSP tree
       run: |
