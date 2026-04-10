@@ -39,7 +39,7 @@ public:
 
     virtual ndk::ScopedAStatus constructDefaultRequestSettings(
         RequestTemplate type,
-        ::android::hardware::camera::common::V1_0::helper::CameraMetadata* meta) = 0;
+        ::aidl::android::hardware::camera::device::CameraMetadata* meta) = 0;
 
     virtual ndk::ScopedAStatus processCaptureRequest(
         const std::vector<CaptureRequest>& requests,
@@ -50,14 +50,14 @@ public:
     virtual ndk::ScopedAStatus close() = 0;
 
     virtual ndk::ScopedAStatus getCaptureRequestMetadataQueue(
-        ::MQDescriptor<int8_t, ::android::hardware::kSynchronizedReadWrite>* desc) = 0;
+        ::aidl::android::hardware::common::fmq::MQDescriptor<int8_t, ::aidl::android::hardware::common::fmq::SynchronizedReadWrite>* desc) = 0;
 
     virtual ndk::ScopedAStatus getCaptureResultMetadataQueue(
-        ::MQDescriptor<int8_t, ::android::hardware::kSynchronizedReadWrite>* desc) = 0;
+        ::aidl::android::hardware::common::fmq::MQDescriptor<int8_t, ::aidl::android::hardware::common::fmq::SynchronizedReadWrite>* desc) = 0;
 
     virtual ndk::ScopedAStatus isReconfigurationRequired(
-        const ::android::hardware::camera::common::V1_0::helper::CameraMetadata& oldSessionParams,
-        const ::android::hardware::camera::common::V1_0::helper::CameraMetadata& newSessionParams,
+        const ::aidl::android::hardware::camera::device::CameraMetadata& oldSessionParams,
+        const ::aidl::android::hardware::camera::device::CameraMetadata& newSessionParams,
         bool* reconfigurationRequired) = 0;
 
     virtual ndk::ScopedAStatus signalStreamFlush(

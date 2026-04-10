@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <aidl/android/hardware/camera/device/CaptureRequest.h>
+#include <camera/CameraMetadata.h>
 
 namespace aidl {
 namespace android {
@@ -12,6 +13,10 @@ namespace hardware {
 namespace camera {
 namespace device {
 
+
+// In test builds, alias to the mock android::CameraMetadata so the override
+// signatures match the base class virtual declarations.
+using CameraMetadata = ::android::CameraMetadata;
 
 struct PhysicalCameraMetadata {
     int64_t fmqMetadataSize = 0;

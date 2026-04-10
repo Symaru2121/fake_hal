@@ -33,11 +33,11 @@ public:
     virtual ~ICameraDevice() = default;
 
     virtual ndk::ScopedAStatus getCameraCharacteristics(
-        ::android::hardware::camera::common::V1_0::helper::CameraMetadata* chars) = 0;
+        ::aidl::android::hardware::camera::device::CameraMetadata* chars) = 0;
 
     virtual ndk::ScopedAStatus getPhysicalCameraCharacteristics(
         const std::string& physicalCameraId,
-        ::android::hardware::camera::common::V1_0::helper::CameraMetadata* chars) = 0;
+        ::aidl::android::hardware::camera::device::CameraMetadata* chars) = 0;
 
     virtual ndk::ScopedAStatus getResourceCost(CameraResourceCost* cost) = 0;
 

@@ -10,8 +10,12 @@
 #include <cutils/native_handle.h>
 
 
+// In AOSP builds, GRALLOC_USAGE_SW_WRITE_OFTEN is an enum in hardware/gralloc.h.
+// Only define it as a macro for test builds where the real header isn't available.
+#ifdef FAKE_HAL_TEST_BUILD
 #ifndef GRALLOC_USAGE_SW_WRITE_OFTEN
 #define GRALLOC_USAGE_SW_WRITE_OFTEN 0x00000030
+#endif
 #endif
 
 namespace fake_hal {

@@ -103,7 +103,15 @@ public:
         return nullptr;
     }
 
+    void acquire(camera_metadata_t*) {
+        // no-op in test mock
+    }
+
     size_t entryCount() const { return entries_.size(); }
+
+    // byte-level metadata buffer, matching AIDL CameraMetadata.metadata field.
+    // In tests, getCameraCharacteristics/constructDefaultRequestSettings assign to this.
+    std::vector<uint8_t> metadata;
 
 private:
     std::map<uint32_t, Entry> entries_;

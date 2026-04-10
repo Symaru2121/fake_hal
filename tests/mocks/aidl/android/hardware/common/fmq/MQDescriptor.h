@@ -7,6 +7,8 @@ namespace hardware {
 namespace common {
 namespace fmq {
 
+struct SynchronizedReadWrite {};
+
 template <typename T, typename Flavor>
 struct MQDescriptor {
 

@@ -72,7 +72,7 @@ FakeCameraProvider::FakeCameraProvider(const std::string& videoFilePath)
 
 
     for (const auto& id : kCameraIds) {
-        devices_[id] = std::make_shared<FakeCameraDevice>(id, videoFilePath_);
+        devices_[id] = ::std::make_shared<FakeCameraDevice>(id, videoFilePath_);
     }
     ALOGI("FakeCameraProvider: initialized with video: %s", videoFilePath_.c_str());
 }
@@ -120,7 +120,7 @@ ndk::ScopedAStatus FakeCameraProvider::getCameraDeviceInterface(
     if (it == devices_.end()) {
         ALOGE("FakeCameraProvider: unknown camera id: %s", cameraDeviceName.c_str());
         return ndk::ScopedAStatus::fromServiceSpecificError(
-            static_cast<int32_t>(Status::ILLEGAL_ARGUMENT));
+            static_cast<int32_t>(::aidl::android::hardware::camera::common::Status::ILLEGAL_ARGUMENT));
     }
 
     *device = it->second;

@@ -12,8 +12,37 @@
 #include <algorithm>
 #include <sys/mman.h>
 
+#ifndef FAKE_HAL_TEST_BUILD
+#include <sys/system_properties.h>
+#include <cutils/native_handle.h>
+#include <aidl/android/hardware/common/NativeHandle.h>
+#endif
+
 #define LOG_TAG "FakeHAL_Device"
 #include <log/log.h>
+
+#ifndef FAKE_HAL_TEST_BUILD
+// AOSP build: AIDL types use enum classes, NativeHandle instead of buffer_handle_t
+using ::aidl::android::hardware::graphics::common::PixelFormat;
+using ::aidl::android::hardware::graphics::common::BufferUsage;
+using ::aidl::android::hardware::common::NativeHandle;
+
+static native_handle_t* nativeHandleFromAidl(const NativeHandle& nh) {
+    native_handle_t* h = native_handle_create(nh.fds.size(), nh.ints.size());
+    if (!h) return nullptr;
+    for (size_t i = 0; i < nh.fds.size(); i++) h->data[i] = nh.fds[i].get();
+    for (size_t i = 0; i < nh.ints.size(); i++) h->data[nh.fds.size() + i] = nh.ints[i];
+    return h;
+}
+
+// Helper to extract int32_t from format field (PixelFormat enum in AOSP, int32_t in tests)
+template<typename T>
+static inline int32_t fmtToInt(T val) { return static_cast<int32_t>(val); }
+#else
+// Test build: format is already int32_t
+template<typename T>
+static inline int32_t fmtToInt(T val) { return static_cast<int32_t>(val); }
+#endif
 
 namespace fake_hal {
 
@@ -389,12 +418,18 @@ FakeCameraDevice::FakeCameraDevice(const std::string& cameraId,
 ndk::ScopedAStatus FakeCameraDevice::getCameraCharacteristics(
     ::aidl::android::hardware::camera::device::CameraMetadata* chars)
 {
+#ifdef FAKE_HAL_TEST_BUILD
+    // In test builds, CameraMetadata is aliased to android::CameraMetadata (mock).
+    // Copy the characteristics directly since the mock doesn't support serialization.
+    *chars = characteristics_;
+#else
     camera_metadata_t* raw = characteristics_.release();
     if (raw) {
         size_t sz = get_camera_metadata_size(raw);
         chars->metadata.assign((uint8_t*)raw, (uint8_t*)raw + sz);
         characteristics_.acquire(raw);
     }
+#endif
     return ndk::ScopedAStatus::ok();
 }
 
@@ -403,7 +438,7 @@ ndk::ScopedAStatus FakeCameraDevice::getPhysicalCameraCharacteristics(
     ::aidl::android::hardware::camera::device::CameraMetadata*)
 {
     return ndk::ScopedAStatus::fromServiceSpecificError(
-        static_cast<int32_t>(Status::ILLEGAL_ARGUMENT));
+        static_cast<int32_t>(::aidl::android::hardware::camera::common::Status::ILLEGAL_ARGUMENT));
 }
 
 ndk::ScopedAStatus FakeCameraDevice::getResourceCost(CameraResourceCost* cost) {
@@ -434,7 +469,7 @@ ndk::ScopedAStatus FakeCameraDevice::openInjectionSession(
     std::shared_ptr<ICameraInjectionSession>*)
 {
     return ndk::ScopedAStatus::fromServiceSpecificError(
-        static_cast<int32_t>(Status::OPERATION_NOT_SUPPORTED));
+        static_cast<int32_t>(::aidl::android::hardware::camera::common::Status::OPERATION_NOT_SUPPORTED));
 }
 
 ndk::ScopedAStatus FakeCameraDevice::setTorchMode(bool) {
@@ -497,8 +532,8 @@ ndk::ScopedAStatus FakeCameraDeviceSession::configureStreams(
 
     int targetW = 1920, targetH = 1080;
     for (const auto& s : config.streams) {
-        if (s.format == HAL_PIXEL_FORMAT_YCbCr_420_888 ||
-            s.format == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+        if (fmtToInt(s.format) == HAL_PIXEL_FORMAT_YCbCr_420_888 ||
+            fmtToInt(s.format) == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
             targetW = s.width;
             targetH = s.height;
             break;
@@ -522,13 +557,23 @@ ndk::ScopedAStatus FakeCameraDeviceSession::configureStreams(
         hs.id = s.id;
         hs.overrideFormat = s.format;
 
-        if (s.format == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+        if (fmtToInt(s.format) == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+#ifndef FAKE_HAL_TEST_BUILD
+            hs.overrideFormat = static_cast<PixelFormat>(HAL_PIXEL_FORMAT_YCbCr_420_888);
+#else
             hs.overrideFormat = HAL_PIXEL_FORMAT_YCbCr_420_888;
+#endif
         }
 
+#ifndef FAKE_HAL_TEST_BUILD
+        hs.producerUsage = static_cast<BufferUsage>(
+            static_cast<int64_t>(GRALLOC1_PRODUCER_USAGE_CAMERA | GRALLOC1_PRODUCER_USAGE_CPU_WRITE_OFTEN));
+        hs.consumerUsage = static_cast<BufferUsage>(0);
+#else
         hs.producerUsage = static_cast<int64_t>(
             GRALLOC1_PRODUCER_USAGE_CAMERA | GRALLOC1_PRODUCER_USAGE_CPU_WRITE_OFTEN);
         hs.consumerUsage = 0;
+#endif
         hs.maxBuffers    = 4;
         hs.supportOffline = false;
 
@@ -662,7 +707,7 @@ bool FakeCameraDeviceSession::writeJPEGToBuffer(
 
     int32_t blobBufSize = 0;
     for (const auto& s : activeStreams_) {
-        if (s.format == HAL_PIXEL_FORMAT_BLOB) {
+        if (fmtToInt(s.format) == HAL_PIXEL_FORMAT_BLOB) {
             blobBufSize = s.width;
             break;
         }
@@ -741,8 +786,8 @@ void FakeCameraDeviceSession::processOneRequest(const PendingRequest& pending) {
 
     int width = 1920, height = 1080;
     for (const auto& s : activeStreams_) {
-        if (s.format == HAL_PIXEL_FORMAT_YCbCr_420_888 ||
-            s.format == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+        if (fmtToInt(s.format) == HAL_PIXEL_FORMAT_YCbCr_420_888 ||
+            fmtToInt(s.format) == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
             width  = s.width;
             height = s.height;
             break;
@@ -769,21 +814,35 @@ void FakeCameraDeviceSession::processOneRequest(const PendingRequest& pending) {
         int32_t fmt = HAL_PIXEL_FORMAT_YCbCr_420_888;
         for (const auto& s : activeStreams_) {
             if (s.id == ob.streamId) {
-                fmt = s.format;
+                fmt = fmtToInt(s.format);
                 break;
             }
         }
 
         if (fmt == HAL_PIXEL_FORMAT_BLOB) {
-
+#ifndef FAKE_HAL_TEST_BUILD
+            native_handle_t* bufHandle = nativeHandleFromAidl(ob.buffer);
+            writeJPEGToBuffer(bufHandle, yuvBuf_.data(), width, height, *metaRand_);
+            native_handle_delete(bufHandle);
+#else
             writeJPEGToBuffer(ob.buffer, yuvBuf_.data(), width, height, *metaRand_);
+#endif
         } else {
-
+#ifndef FAKE_HAL_TEST_BUILD
+            native_handle_t* bufHandle = nativeHandleFromAidl(ob.buffer);
+            writeYUVToBuffer(bufHandle, yuvBuf_.data(), width, height);
+            native_handle_delete(bufHandle);
+#else
             writeYUVToBuffer(ob.buffer, yuvBuf_.data(), width, height);
+#endif
         }
 
 
+#ifndef FAKE_HAL_TEST_BUILD
+        sb.releaseFence = ::aidl::android::hardware::common::NativeHandle();
+#else
         sb.releaseFence = ndk::ScopedFileDescriptor(-1);
+#endif
         outputBuffers.push_back(std::move(sb));
     }
 
@@ -823,12 +882,17 @@ ndk::ScopedAStatus FakeCameraDeviceSession::constructDefaultRequestSettings(
     uint8_t awbMode = ANDROID_CONTROL_AWB_MODE_AUTO;
     settings.update(ANDROID_CONTROL_AWB_MODE, &awbMode, 1);
 
+#ifdef FAKE_HAL_TEST_BUILD
+    // In test builds, CameraMetadata is aliased to android::CameraMetadata (mock).
+    *meta = settings;
+#else
     camera_metadata_t* raw = settings.release();
     if (raw) {
         size_t sz = get_camera_metadata_size(raw);
         meta->metadata.assign((uint8_t*)raw, (uint8_t*)raw + sz);
         free_camera_metadata(raw);
     }
+#endif
     return ndk::ScopedAStatus::ok();
 }
 
@@ -870,7 +934,7 @@ ndk::ScopedAStatus FakeCameraDeviceSession::switchToOffline(
     std::shared_ptr<ICameraOfflineSession>*)
 {
     return ndk::ScopedAStatus::fromServiceSpecificError(
-        static_cast<int32_t>(Status::OPERATION_NOT_SUPPORTED));
+        static_cast<int32_t>(::aidl::android::hardware::camera::common::Status::OPERATION_NOT_SUPPORTED));
 }
 
 ndk::ScopedAStatus FakeCameraDeviceSession::repeatingRequestEnd(
