@@ -199,14 +199,190 @@ static android::CameraMetadata buildPixel7FrontCharacteristics() {
 }
 
 
+// ---- Pixel 4 (flame) camera characteristics ----
+// Pixel 4 rear: Sony IMX363, 12.2 MP, f/1.7, 4.44mm focal, 1/2.55" sensor
+static android::CameraMetadata buildPixel4MainCharacteristics() {
+    android::CameraMetadata meta;
+
+    uint8_t facing = ANDROID_LENS_FACING_BACK;
+    meta.update(ANDROID_LENS_FACING, &facing, 1);
+
+    // Sony IMX363: 1/2.55" sensor = ~5.64 x 4.23 mm
+    float physW = 5.64f, physH = 4.23f;
+    meta.update(ANDROID_SENSOR_INFO_PHYSICAL_SIZE, new float[2]{physW, physH}, 2);
+
+    // 12.2 MP = 4032x3024
+    int32_t pixelArray[2] = {4032, 3024};
+    meta.update(ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE, pixelArray, 2);
+
+    int32_t activeArray[4] = {0, 0, 4032, 3024};
+    meta.update(ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE, activeArray, 4);
+
+    float aperture = 1.7f;
+    meta.update(ANDROID_LENS_INFO_AVAILABLE_APERTURES, &aperture, 1);
+
+    float focalLen = 4.44f;
+    meta.update(ANDROID_LENS_INFO_AVAILABLE_FOCAL_LENGTHS, &focalLen, 1);
+
+    int32_t isoRange[2] = {50, 6400};
+    meta.update(ANDROID_SENSOR_INFO_SENSITIVITY_RANGE, isoRange, 2);
+
+    int64_t expRange[2] = {13'000LL, 1'000'000'000LL};
+    meta.update(ANDROID_SENSOR_INFO_EXPOSURE_TIME_RANGE, expRange, 2);
+
+    int64_t frameDurRange[2] = {33'333'333LL, 200'000'000LL};
+    meta.update(ANDROID_SENSOR_INFO_MAX_FRAME_DURATION, &frameDurRange[1], 1);
+
+    uint8_t cfa = ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGGB;
+    meta.update(ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT, &cfa, 1);
+
+    uint8_t hwLevel = ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_FULL;
+    meta.update(ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL, &hwLevel, 1);
+
+    uint8_t caps[] = {
+        ANDROID_REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE,
+        ANDROID_REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR,
+        ANDROID_REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING,
+        ANDROID_REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS,
+    };
+    meta.update(ANDROID_REQUEST_AVAILABLE_CAPABILITIES, caps, sizeof(caps));
+
+    uint8_t pipelineDepth = 4;
+    meta.update(ANDROID_REQUEST_PIPELINE_MAX_DEPTH, &pipelineDepth, 1);
+
+    std::vector<int32_t> streamConfigs;
+    auto addConfig = [&](int32_t fmt, int32_t w, int32_t h) {
+        streamConfigs.push_back(fmt);
+        streamConfigs.push_back(w);
+        streamConfigs.push_back(h);
+        streamConfigs.push_back(ANDROID_SCALER_AVAILABLE_STREAM_CONFIGURATIONS_OUTPUT);
+    };
+
+    addConfig(HAL_PIXEL_FORMAT_BLOB, 4032, 3024);
+    addConfig(HAL_PIXEL_FORMAT_BLOB, 1920, 1080);
+
+    addConfig(HAL_PIXEL_FORMAT_YCbCr_420_888, 4032, 3024);
+    addConfig(HAL_PIXEL_FORMAT_YCbCr_420_888, 1920, 1080);
+    addConfig(HAL_PIXEL_FORMAT_YCbCr_420_888, 1280, 720);
+    addConfig(HAL_PIXEL_FORMAT_YCbCr_420_888, 640, 480);
+    addConfig(HAL_PIXEL_FORMAT_YCbCr_420_888, 320, 240);
+
+    addConfig(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED, 1920, 1080);
+    addConfig(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED, 1280, 720);
+    addConfig(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED, 640, 480);
+
+    meta.update(ANDROID_SCALER_AVAILABLE_STREAM_CONFIGURATIONS,
+                streamConfigs.data(), streamConfigs.size());
+
+    std::vector<int64_t> minDurations;
+    auto addDur = [&](int32_t fmt, int32_t w, int32_t h) {
+        minDurations.push_back(fmt);
+        minDurations.push_back(w);
+        minDurations.push_back(h);
+        minDurations.push_back(33'333'333LL);
+    };
+    addDur(HAL_PIXEL_FORMAT_YCbCr_420_888, 4032, 3024);
+    addDur(HAL_PIXEL_FORMAT_YCbCr_420_888, 1920, 1080);
+    addDur(HAL_PIXEL_FORMAT_YCbCr_420_888, 1280, 720);
+    addDur(HAL_PIXEL_FORMAT_YCbCr_420_888, 640, 480);
+    addDur(HAL_PIXEL_FORMAT_BLOB, 4032, 3024);
+    addDur(HAL_PIXEL_FORMAT_BLOB, 1920, 1080);
+    addDur(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED, 1920, 1080);
+    addDur(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED, 1280, 720);
+
+    meta.update(ANDROID_SCALER_AVAILABLE_MIN_FRAME_DURATIONS,
+                minDurations.data(), minDurations.size());
+
+    uint8_t aeModes[] = {ANDROID_CONTROL_AE_MODE_OFF, ANDROID_CONTROL_AE_MODE_ON};
+    meta.update(ANDROID_CONTROL_AE_AVAILABLE_MODES, aeModes, 2);
+
+    uint8_t afModes[] = {
+        ANDROID_CONTROL_AF_MODE_OFF,
+        ANDROID_CONTROL_AF_MODE_AUTO,
+        ANDROID_CONTROL_AF_MODE_CONTINUOUS_PICTURE,
+        ANDROID_CONTROL_AF_MODE_CONTINUOUS_VIDEO,
+    };
+    meta.update(ANDROID_CONTROL_AF_AVAILABLE_MODES, afModes, 4);
+
+    uint8_t awbModes[] = {
+        ANDROID_CONTROL_AWB_MODE_OFF,
+        ANDROID_CONTROL_AWB_MODE_AUTO,
+        ANDROID_CONTROL_AWB_MODE_DAYLIGHT,
+        ANDROID_CONTROL_AWB_MODE_CLOUDY_DAYLIGHT,
+    };
+    meta.update(ANDROID_CONTROL_AWB_AVAILABLE_MODES, awbModes, 4);
+
+    uint8_t oisModes[] = {
+        ANDROID_LENS_OPTICAL_STABILIZATION_MODE_OFF,
+        ANDROID_LENS_OPTICAL_STABILIZATION_MODE_ON
+    };
+    meta.update(ANDROID_LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION, oisModes, 2);
+
+    uint8_t nrModes[] = {
+        ANDROID_NOISE_REDUCTION_MODE_OFF,
+        ANDROID_NOISE_REDUCTION_MODE_FAST,
+        ANDROID_NOISE_REDUCTION_MODE_HIGH_QUALITY,
+    };
+    meta.update(ANDROID_NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES, nrModes, 3);
+
+    float focusRange[2] = {0.0f, 10.0f};
+    meta.update(ANDROID_LENS_INFO_MINIMUM_FOCUS_DISTANCE, &focusRange[1], 1);
+
+    uint8_t croppingType = ANDROID_SCALER_CROPPING_TYPE_CENTER_ONLY;
+    meta.update(ANDROID_SCALER_CROPPING_TYPE, &croppingType, 1);
+
+    float maxZoom = 8.0f;
+    meta.update(ANDROID_SCALER_AVAILABLE_MAX_DIGITAL_ZOOM, &maxZoom, 1);
+
+    return meta;
+}
+
+// Pixel 4 front: 8 MP, f/2.0, 3.0mm focal
+static android::CameraMetadata buildPixel4FrontCharacteristics() {
+    android::CameraMetadata meta = buildPixel4MainCharacteristics();
+
+    uint8_t facing = ANDROID_LENS_FACING_FRONT;
+    meta.update(ANDROID_LENS_FACING, &facing, 1);
+
+    float aperture = 2.0f;
+    meta.update(ANDROID_LENS_INFO_AVAILABLE_APERTURES, &aperture, 1);
+
+    float focalLen = 3.0f;
+    meta.update(ANDROID_LENS_INFO_AVAILABLE_FOCAL_LENGTHS, &focalLen, 1);
+
+    // 8 MP = 3264x2448
+    int32_t pixelArray[2] = {3264, 2448};
+    meta.update(ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE, pixelArray, 2);
+
+    int32_t activeArray[4] = {0, 0, 3264, 2448};
+    meta.update(ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE, activeArray, 4);
+
+    return meta;
+}
+
+// Determine device model at runtime (or default to Pixel 7)
+static std::string getDeviceCodename() {
+#ifdef __ANDROID__
+    char prop[92] = {};
+    if (__system_property_get("ro.product.device", prop) > 0) return prop;
+#endif
+    return "panther"; // default
+}
+
+
 FakeCameraDevice::FakeCameraDevice(const std::string& cameraId,
                                    const std::string& videoFilePath)
     : cameraId_(cameraId), videoFilePath_(videoFilePath)
 {
+    std::string codename = getDeviceCodename();
+    bool isPixel4 = (codename == "flame" || codename == "coral");
+
     if (cameraId == "0") {
-        characteristics_ = buildPixel7MainCharacteristics();
+        characteristics_ = isPixel4 ? buildPixel4MainCharacteristics()
+                                   : buildPixel7MainCharacteristics();
     } else {
-        characteristics_ = buildPixel7FrontCharacteristics();
+        characteristics_ = isPixel4 ? buildPixel4FrontCharacteristics()
+                                   : buildPixel7FrontCharacteristics();
     }
 }
 

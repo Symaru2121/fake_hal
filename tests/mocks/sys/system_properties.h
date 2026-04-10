@@ -20,6 +20,10 @@ inline int __system_property_get(const char* name, char* value) {
         strcpy(value, "Pixel 7");
         return strlen(value);
     }
+    if (strcmp(name, "ro.product.device") == 0) {
+        strcpy(value, "panther");
+        return strlen(value);
+    }
     value[0] = '\0';
     return 0;
 }

@@ -23,7 +23,7 @@ FASTBOOT="fastboot${DEVICE_SERIAL:+ -s $DEVICE_SERIAL}"
 BACKUP_DIR="${BACKUP_DIR:-$HOME/.fake_hal_backups}"
 BACKUP_VBMETA="$BACKUP_DIR/vbmeta_original.img"
 
-SUPPORTED_DEVICES="panther cheetah lynx"
+SUPPORTED_DEVICES="panther cheetah lynx flame coral"
 
 
 check_fastboot() {
@@ -70,6 +70,12 @@ check_device_support() {
             ;;
         lynx)
             info "Устройство: Pixel 7a ($device)"
+            ;;
+        flame)
+            info "Устройство: Pixel 4 ($device)"
+            ;;
+        coral)
+            info "Устройство: Pixel 4 XL ($device)"
             ;;
         *)
             warn "Устройство '$device' не в списке поддерживаемых ($SUPPORTED_DEVICES)"

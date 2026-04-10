@@ -18,7 +18,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake g++ build-essential
+        sudo apt-get install -y cmake g++ build-essential libjpeg-turbo8-dev
 
     - name: Configure CMake (tests)
       run: |

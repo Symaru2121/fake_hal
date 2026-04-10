@@ -10,7 +10,7 @@
 гироскопическая стабилизация, JPEG с EXIF-метаданными и
 уникальный цифровой отпечаток (FPN) для каждого устройства.
 
-**Целевые устройства:** Pixel 7 (panther), Pixel 7 Pro (cheetah), Pixel 7a (lynx).
+**Целевые устройства:** Pixel 4 (flame), Pixel 7 (panther), Pixel 7 Pro (cheetah), Pixel 7a (lynx).
 
 ---
 
@@ -74,6 +74,8 @@
 
 | Модель | Кодовое имя | Статус |
 |--------|-------------|--------|
+| Pixel 4 | flame | Полная поддержка |
+| Pixel 4 XL | coral | Полная поддержка |
 | Pixel 7 | panther | Полная поддержка |
 | Pixel 7 Pro | cheetah | Полная поддержка |
 | Pixel 7a | lynx | Полная поддержка |
@@ -1113,6 +1115,8 @@ adb shell su -c "kill $(pidof camera.provider-fake)"
 
 | Устройство | SoC | gralloc | Статус |
 |-----------|-----|---------|--------|
+| Pixel 4 (flame) | Snapdragon 855 | 3.0/mmap | Полная поддержка |
+| Pixel 4 XL (coral) | Snapdragon 855 | 3.0/mmap | Полная поддержка |
 | Pixel 7 (panther) | Tensor G2 | 4.0 | Полная поддержка |
 | Pixel 7 Pro (cheetah) | Tensor G2 | 4.0 | Полная поддержка |
 | Pixel 7a (lynx) | Tensor G2 | 4.0 | Полная поддержка |

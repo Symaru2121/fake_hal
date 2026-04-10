@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     runs-on: self-hosted
+    timeout-minutes: 180
 
     steps:
     - name: Checkout FakeHAL
@@ -17,85 +18,104 @@ jobs:
       with:
         path: fake_hal
 
-    - name: Setup AOSP environment
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq \
+          openjdk-17-jdk python3 python3-pip git curl unzip \
+          ccache build-essential zip rsync libncurses5 \
+          2>/dev/null || true
+
+    - name: Setup ccache
+      run: |
+        mkdir -p ~/.ccache
+        echo "max_size = 20G" > ~/.ccache/ccache.conf
+        echo "compression = true" >> ~/.ccache/ccache.conf
+
+    - name: Setup AOSP (if not cached)
       run: |
         export AOSP_ROOT=$HOME/aosp
-        mkdir -p $AOSP_ROOT
+
+        # Install repo tool if not present
+        if ! command -v repo &>/dev/null; then
+          mkdir -p ~/bin
+          curl -s https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+          export PATH=$PATH:~/bin
+        fi
+
+        if [ ! -f "$AOSP_ROOT/build/envsetup.sh" ]; then
+          mkdir -p $AOSP_ROOT
+          cd $AOSP_ROOT
+
+          repo init -u https://android.googlesource.com/platform/manifest \
+            -b android-14.0.0_r1 --depth=1
+
+          # Selective sync for faster builds
+          repo sync -c -j$(nproc) --no-tags --no-clone-bundle \
+            platform/build \
+            platform/build/soong \
+            platform/prebuilts/build-tools \
+            platform/prebuilts/clang/host/linux-x86 \
+            platform/prebuilts/go/linux-x86 \
+            platform/frameworks/av \
+            platform/frameworks/native \
+            platform/system/core \
+            platform/system/media \
+            platform/hardware/interfaces \
+            platform/hardware/libhardware \
+            platform/external/libjpeg-turbo \
+            device/google/pantah \
+            device/google/gs201 \
+            device/google/flame \
+            device/google/coral
+        else
+          echo "AOSP already present, skipping sync"
+        fi
+
+    - name: Copy FakeHAL to AOSP tree
+      run: |
+        export AOSP_ROOT=$HOME/aosp
+        DEST="$AOSP_ROOT/vendor/fake_hal"
+        mkdir -p "$DEST"
+        rsync -a --delete fake_hal/ "$DEST/" \
+          --exclude .git --exclude tests --exclude .github
+
+    - name: Build FakeHAL binary
+      run: |
+        export AOSP_ROOT=$HOME/aosp
+        export PATH=$PATH:~/bin
+        export USE_CCACHE=1
+        export CCACHE_DIR=$HOME/.ccache
         cd $AOSP_ROOT
 
-
-        repo init -u https://android.googlesource.com/platform/manifest -b android-14.0.0_r1
-
-
-        repo sync -c -j$(nproc) --no-tags --no-clone-bundle \
-          platform/frameworks/av \
-          platform/frameworks/native \
-          platform/system/core \
-          platform/hardware/interfaces \
-          device/google/panther \
-          device/google/tensor
-
-    - name: Copy FakeHAL to AOSP
-      run: |
-        export AOSP_ROOT=$HOME/aosp
-        mkdir -p $AOSP_ROOT/vendor/fake_hal
-        cp -r fake_hal/* $AOSP_ROOT/vendor/fake_hal/
-
-
-        cat > $AOSP_ROOT/vendor/fake_hal/Android.bp << 'EOF'
-        cc_binary {
-            name: "fake_hal_main",
-            srcs: [
-                "src/main.cpp",
-                "src/FakeCameraProvider.cpp",
-                "src/FakeCameraDevice.cpp",
-                "src/VideoFrameReader.cpp",
-                "src/GrallocHelper.cpp",
-                "src/TimestampSync.cpp",
-                "src/MetadataRandomizer.cpp",
-                "src/NoiseOverlay.cpp",
-                "src/GyroWarp.cpp",
-                "src/JpegEncoder.cpp",
-            ],
-            include_dirs: [
-                "vendor/fake_hal/include",
-            ],
-            shared_libs: [
-                "libbinder",
-                "libcamera2ndk",
-                "libmediandk",
-                "libjpeg",
-                "liblog",
-                "libutils",
-                "libcutils",
-            ],
-            cflags: [
-                "-Wno-unused-parameter",
-                "-Wno-unused-function",
-                "-Wno-unused-variable",
-                "-Wno-missing-field-initializers",
-            ],
-        }
-        EOF
-
-    - name: Setup build environment
-      run: |
-        export AOSP_ROOT=$HOME/aosp
-        cd $AOSP_ROOT
         source build/envsetup.sh
         lunch aosp_panther-userdebug
 
-    - name: Build FakeHAL
+        # Build only our module
+        m android.hardware.camera.provider-fake -j$(nproc)
+
+    - name: Collect build artifacts
       run: |
         export AOSP_ROOT=$HOME/aosp
-        cd $AOSP_ROOT
-        make fake_hal_main -j$(nproc)
+        mkdir -p $GITHUB_WORKSPACE/artifacts
+
+        # Find the built binary
+        BINARY=$(find $AOSP_ROOT/out -name "android.hardware.camera.provider-fake" \
+          -type f -executable 2>/dev/null | head -1)
+
+        if [ -n "$BINARY" ]; then
+          cp "$BINARY" $GITHUB_WORKSPACE/artifacts/
+          echo "Binary found: $BINARY"
+          ls -lh $GITHUB_WORKSPACE/artifacts/
+        else
+          echo "WARNING: Binary not found in AOSP output"
+          exit 1
+        fi
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: fake-hal-binary
-        path: |
-          $HOME/aosp/out/target/product/panther/system/bin/fake_hal_main
-          $HOME/aosp/out/target/product/panther/system/lib64/libjpeg.so
-          $HOME/aosp/out/target/product/panther/system/lib64/libcamera2ndk.so
+        path: artifacts/
+        retention-days: 30

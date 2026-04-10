@@ -20,11 +20,23 @@ set(MOCK_INCLUDES
 )
 
 
-add_library(jpeg SHARED IMPORTED)
-set_target_properties(jpeg PROPERTIES
-    IMPORTED_LOCATION "/system/lib64/libjpeg.so"
-    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/mocks"
-)
+# Try to find system libjpeg first, fall back to mock
+find_library(JPEG_LIBRARY NAMES jpeg turbojpeg)
+if(JPEG_LIBRARY)
+    add_library(jpeg SHARED IMPORTED)
+    set_target_properties(jpeg PROPERTIES
+        IMPORTED_LOCATION "${JPEG_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/mocks"
+    )
+    message(STATUS "Found system libjpeg: ${JPEG_LIBRARY}")
+else()
+    add_library(jpeg SHARED IMPORTED)
+    set_target_properties(jpeg PROPERTIES
+        IMPORTED_LOCATION "/system/lib64/libjpeg.so"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/mocks"
+    )
+    message(STATUS "Using Android libjpeg path")
+endif()
 
 
 add_library(fake_hal_core STATIC

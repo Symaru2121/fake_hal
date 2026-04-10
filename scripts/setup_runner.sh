@@ -29,8 +29,10 @@ repo sync -c -j$(nproc) --no-tags --no-clone-bundle \
   platform/frameworks/native \
   platform/system/core \
   platform/hardware/interfaces \
-  device/google/panther \
-  device/google/tensor
+  device/google/pantah \
+  device/google/gs201 \
+  device/google/flame \
+  device/google/coral
 
 echo "AOSP setup complete."
 
@@ -41,11 +43,11 @@ curl -o actions-runner-linux-x64-2.311.0.tar.gz -L https://github.com/actions/ru
 tar xzf ./actions-runner-linux-x64-2.311.0.tar.gz
 
 echo "Runner downloaded. Now configure:"
-echo "1. Go to https://github.com/YOUR_REPO/settings/actions/runners"
+echo "1. Go to https://github.com/Symaru2121/fake_hal/settings/actions/runners"
 echo "2. Click 'New self-hosted runner'"
 echo "3. Choose Linux, x64"
 echo "4. Copy the token"
-echo "5. Run: ./config.sh --url https://github.com/YOUR_REPO --token YOUR_TOKEN"
-echo "6. Run: ./run.sh &"
+echo "5. Run: ./config.sh --url https://github.com/Symaru2121/fake_hal --token YOUR_TOKEN"
+echo "6. Run: nohup ./run.sh &"
 
 echo "After setup, push code to trigger build."

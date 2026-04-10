@@ -39,11 +39,16 @@ set_perm "$MODPATH/vendor_overlay/bin/hw/android.hardware.camera.provider-fake" 
     root shell 0755
 
 
-if [ "$DEVICE" != "panther" ] && [ "$DEVICE" != "cheetah" ]; then
-    ui_print "WARNING: Device $DEVICE is not Pixel 7/7 Pro"
-    ui_print "This module is optimized for panther/cheetah"
-    ui_print "Installing anyway, manual tuning may be needed"
-fi
+case "$DEVICE" in
+    panther|cheetah|lynx|flame|coral)
+        ui_print "Device $DEVICE is supported"
+        ;;
+    *)
+        ui_print "WARNING: Device $DEVICE is not in supported list"
+        ui_print "Supported: panther/cheetah/lynx/flame/coral"
+        ui_print "Installing anyway, manual tuning may be needed"
+        ;;
+esac
 
 ui_print "FakeHAL installed!"
 ui_print "Place your MP4 at: /data/local/tmp/fake_video.mp4"
