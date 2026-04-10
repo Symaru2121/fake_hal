@@ -1,6 +1,7 @@
 #include "FakeCameraProvider.h"
 #include "FakeCameraDevice.h"
 
+#include <aidl/android/hardware/camera/common/Status.h>
 #include <android/binder_manager.h>
 #include <android/binder_process.h>
 
@@ -72,7 +73,7 @@ FakeCameraProvider::FakeCameraProvider(const std::string& videoFilePath)
 
 
     for (const auto& id : kCameraIds) {
-        devices_[id] = ::std::make_shared<FakeCameraDevice>(id, videoFilePath_);
+        devices_[id] = ndk::SharedRefBase::make<FakeCameraDevice>(id, videoFilePath_);
     }
     ALOGI("FakeCameraProvider: initialized with video: %s", videoFilePath_.c_str());
 }

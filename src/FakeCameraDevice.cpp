@@ -16,6 +16,7 @@
 #include <sys/system_properties.h>
 #include <cutils/native_handle.h>
 #include <aidl/android/hardware/common/NativeHandle.h>
+#include <aidl/android/hardware/camera/common/Status.h>
 #endif
 
 #define LOG_TAG "FakeHAL_Device"
@@ -597,12 +598,12 @@ ndk::ScopedAStatus FakeCameraDeviceSession::processCaptureRequest(
 
     {
         std::lock_guard<std::mutex> lk(queueMutex_);
-        for (const auto& req : requests) {
+        for (auto& req : const_cast<std::vector<CaptureRequest>&>(requests)) {
             struct timespec ts;
             clock_gettime(CLOCK_MONOTONIC, &ts);
             int64_t nowNs = (int64_t)ts.tv_sec * 1'000'000'000LL + ts.tv_nsec;
 
-            requestQueue_.push({req, nowNs});
+            requestQueue_.push({std::move(req), nowNs});
         }
     }
     queueCv_.notify_one();
@@ -619,7 +620,7 @@ void FakeCameraDeviceSession::workerLoop() {
                 return !requestQueue_.empty() || !workerRunning_;
             });
             if (!workerRunning_) break;
-            req = requestQueue_.front();
+            req = std::move(requestQueue_.front());
             requestQueue_.pop();
         }
         processOneRequest(req);
@@ -849,7 +850,7 @@ void FakeCameraDeviceSession::processOneRequest(const PendingRequest& pending) {
 
     CaptureResult result;
     result.frameNumber       = frameNumber_++;
-    result.outputBuffers     = outputBuffers;
+    result.outputBuffers     = std::move(outputBuffers);
     result.inputBuffer.streamId = -1;
     result.partialResult     = 1;
 
@@ -863,7 +864,9 @@ void FakeCameraDeviceSession::processOneRequest(const PendingRequest& pending) {
 
 
     if (callback_) {
-        callback_->processCaptureResult({result});
+        std::vector<CaptureResult> results;
+        results.push_back(std::move(result));
+        callback_->processCaptureResult(results);
     }
 }
 

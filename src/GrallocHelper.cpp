@@ -206,7 +206,7 @@ bool GrallocHelper::lockGralloc3(buffer_handle_t h, int w, int h2,
         static_cast<uint64_t>(usage),
         accessRegion,
         android::hardware::hidl_handle(),
-        [&](Error3 err, void* mappedPtr) {
+        [&](Error3 err, void* mappedPtr, int32_t /*bytesPerPixel*/, int32_t /*bytesPerStride*/) {
             if (err == Error3::NONE && mappedPtr != nullptr) {
                 *ptr = mappedPtr;
                 success = true;
