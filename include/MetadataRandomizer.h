@@ -1,6 +1,6 @@
 #pragma once
 
-#include <android/hardware/camera/CameraMetadata.h>
+#include <camera/CameraMetadata.h>
 #include <system/camera_metadata.h>
 #include <random>
 #include <cstdint>

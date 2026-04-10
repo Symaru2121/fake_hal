@@ -387,15 +387,20 @@ FakeCameraDevice::FakeCameraDevice(const std::string& cameraId,
 }
 
 ndk::ScopedAStatus FakeCameraDevice::getCameraCharacteristics(
-    android::hardware::camera::common::V1_0::helper::CameraMetadata* chars)
+    ::aidl::android::hardware::camera::device::CameraMetadata* chars)
 {
-    *chars = characteristics_;
+    camera_metadata_t* raw = characteristics_.release();
+    if (raw) {
+        size_t sz = get_camera_metadata_size(raw);
+        chars->metadata.assign((uint8_t*)raw, (uint8_t*)raw + sz);
+        characteristics_.acquire(raw);
+    }
     return ndk::ScopedAStatus::ok();
 }
 
 ndk::ScopedAStatus FakeCameraDevice::getPhysicalCameraCharacteristics(
     const std::string&,
-    android::hardware::camera::common::V1_0::helper::CameraMetadata*)
+    ::aidl::android::hardware::camera::device::CameraMetadata*)
 {
     return ndk::ScopedAStatus::fromServiceSpecificError(
         static_cast<int32_t>(Status::ILLEGAL_ARGUMENT));
@@ -806,16 +811,24 @@ void FakeCameraDeviceSession::processOneRequest(const PendingRequest& pending) {
 
 ndk::ScopedAStatus FakeCameraDeviceSession::constructDefaultRequestSettings(
     RequestTemplate type,
-    android::hardware::camera::common::V1_0::helper::CameraMetadata* meta)
+    ::aidl::android::hardware::camera::device::CameraMetadata* meta)
 {
     (void)type;
 
+    android::CameraMetadata settings;
     uint8_t aeMode = ANDROID_CONTROL_AE_MODE_ON;
-    meta->update(ANDROID_CONTROL_AE_MODE, &aeMode, 1);
+    settings.update(ANDROID_CONTROL_AE_MODE, &aeMode, 1);
     uint8_t afMode = ANDROID_CONTROL_AF_MODE_CONTINUOUS_PICTURE;
-    meta->update(ANDROID_CONTROL_AF_MODE, &afMode, 1);
+    settings.update(ANDROID_CONTROL_AF_MODE, &afMode, 1);
     uint8_t awbMode = ANDROID_CONTROL_AWB_MODE_AUTO;
-    meta->update(ANDROID_CONTROL_AWB_MODE, &awbMode, 1);
+    settings.update(ANDROID_CONTROL_AWB_MODE, &awbMode, 1);
+
+    camera_metadata_t* raw = settings.release();
+    if (raw) {
+        size_t sz = get_camera_metadata_size(raw);
+        meta->metadata.assign((uint8_t*)raw, (uint8_t*)raw + sz);
+        free_camera_metadata(raw);
+    }
     return ndk::ScopedAStatus::ok();
 }
 
@@ -828,16 +841,22 @@ ndk::ScopedAStatus FakeCameraDeviceSession::flush() {
 }
 
 ndk::ScopedAStatus FakeCameraDeviceSession::getCaptureRequestMetadataQueue(
-    MQDescriptor<int8_t, android::hardware::kSynchronizedReadWrite>*)
-{ return ndk::ScopedAStatus::fromExceptionCode(EX_UNSUPPORTED_OPERATION); }
+    ::aidl::android::hardware::common::fmq::MQDescriptor<int8_t, ::aidl::android::hardware::common::fmq::SynchronizedReadWrite>*)
+{
+    // FMQ not used - metadata passed inline
+    return ndk::ScopedAStatus::ok();
+}
 
 ndk::ScopedAStatus FakeCameraDeviceSession::getCaptureResultMetadataQueue(
-    MQDescriptor<int8_t, android::hardware::kSynchronizedReadWrite>*)
-{ return ndk::ScopedAStatus::fromExceptionCode(EX_UNSUPPORTED_OPERATION); }
+    ::aidl::android::hardware::common::fmq::MQDescriptor<int8_t, ::aidl::android::hardware::common::fmq::SynchronizedReadWrite>*)
+{
+    // FMQ not used - metadata passed inline
+    return ndk::ScopedAStatus::ok();
+}
 
 ndk::ScopedAStatus FakeCameraDeviceSession::isReconfigurationRequired(
-    const android::hardware::camera::common::V1_0::helper::CameraMetadata&,
-    const android::hardware::camera::common::V1_0::helper::CameraMetadata&,
+    const ::aidl::android::hardware::camera::device::CameraMetadata&,
+    const ::aidl::android::hardware::camera::device::CameraMetadata&,
     bool* out)
 { *out = false; return ndk::ScopedAStatus::ok(); }
 

@@ -45,7 +45,7 @@ public:
 
     ndk::ScopedAStatus constructDefaultRequestSettings(
         RequestTemplate type,
-        android::hardware::camera::common::V1_0::helper::CameraMetadata* requestTemplate) override;
+        ::aidl::android::hardware::camera::device::CameraMetadata* requestTemplate) override;
 
     ndk::ScopedAStatus configureStreams(
         const StreamConfiguration& requestedConfiguration,
@@ -60,14 +60,14 @@ public:
     ndk::ScopedAStatus close() override;
 
     ndk::ScopedAStatus getCaptureRequestMetadataQueue(
-        MQDescriptor<int8_t, android::hardware::kSynchronizedReadWrite>* desc) override;
+        ::aidl::android::hardware::common::fmq::MQDescriptor<int8_t, ::aidl::android::hardware::common::fmq::SynchronizedReadWrite>* desc) override;
 
     ndk::ScopedAStatus getCaptureResultMetadataQueue(
-        MQDescriptor<int8_t, android::hardware::kSynchronizedReadWrite>* desc) override;
+        ::aidl::android::hardware::common::fmq::MQDescriptor<int8_t, ::aidl::android::hardware::common::fmq::SynchronizedReadWrite>* desc) override;
 
     ndk::ScopedAStatus isReconfigurationRequired(
-        const android::hardware::camera::common::V1_0::helper::CameraMetadata& oldSessionParams,
-        const android::hardware::camera::common::V1_0::helper::CameraMetadata& newSessionParams,
+        const ::aidl::android::hardware::camera::device::CameraMetadata& oldSessionParams,
+        const ::aidl::android::hardware::camera::device::CameraMetadata& newSessionParams,
         bool* reconfigurationRequired) override;
 
     ndk::ScopedAStatus signalStreamFlush(
@@ -149,11 +149,11 @@ public:
                      const std::string& videoFilePath);
 
     ndk::ScopedAStatus getCameraCharacteristics(
-        android::hardware::camera::common::V1_0::helper::CameraMetadata* chars) override;
+        ::aidl::android::hardware::camera::device::CameraMetadata* chars) override;
 
     ndk::ScopedAStatus getPhysicalCameraCharacteristics(
         const std::string& physicalCameraId,
-        android::hardware::camera::common::V1_0::helper::CameraMetadata* chars) override;
+        ::aidl::android::hardware::camera::device::CameraMetadata* chars) override;
 
     ndk::ScopedAStatus getResourceCost(CameraResourceCost* cost) override;
 

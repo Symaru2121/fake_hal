@@ -52,12 +52,27 @@ jobs:
           repo init -u https://android.googlesource.com/platform/manifest \
             -b android-14.0.0_r1 --depth=1
 
-          # Full sync - first run takes hours, subsequent runs are cached
           repo sync -c -j$(nproc) --no-tags --no-clone-bundle --optimized-fetch
         else
           echo "AOSP already present, skipping sync"
-          echo "To force re-sync, remove ~/aosp/build/envsetup.sh"
         fi
+
+    - name: Patch AOSP for vendor HAL compatibility
+      run: |
+        export AOSP_ROOT=$HOME/aosp
+
+        # Patch libcamera_client to be vendor_available
+        CAMERA_BP="$AOSP_ROOT/frameworks/av/camera/Android.bp"
+        if ! grep -q 'vendor_available: true' "$CAMERA_BP"; then
+          echo "Patching libcamera_client for vendor_available..."
+          sed -i '/name: "libcamera_client",/a\    vendor_available: true,' "$CAMERA_BP"
+          echo "Patched successfully"
+        else
+          echo "libcamera_client already patched"
+        fi
+
+        # Clean soong intermediates for libcamera_client to pick up the change
+        rm -rf "$AOSP_ROOT/out/soong/.intermediates/frameworks/av/camera/libcamera_client" 2>/dev/null || true
 
     - name: Copy FakeHAL to AOSP tree
       run: |
