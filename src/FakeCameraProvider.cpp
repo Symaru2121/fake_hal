@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sys/system_properties.h>
 
+#undef LOG_TAG
 #define LOG_TAG "FakeHAL_Provider"
 #include <log/log.h>
 
@@ -25,8 +26,8 @@ std::string FakeCameraProvider::readDeviceSerial() {
         if (fgets(buf, sizeof(buf), f)) {
             fclose(f);
             size_t len = strlen(buf);
-            while (len > 0 && (buf[len-1] == n || buf[len-1] == r))
-                buf[--len] = 0;
+            while (len > 0 && (buf[len-1] == '\n' || buf[len-1] == '\r'))
+                buf[--len] = '\0';
             if (len > 0) return buf;
         } else {
             fclose(f);
@@ -93,7 +94,6 @@ Return<void> FakeCameraProvider::getVendorTags(getVendorTags_cb _hidl_cb) {
 }
 
 Return<void> FakeCameraProvider::getCameraIdList(getCameraIdList_cb _hidl_cb) {
-    // Return fully qualified device names: device@3.7/fake/<id>
     std::vector<hidl_string> deviceNames;
     for (const auto& id : kCameraIds) {
         deviceNames.push_back("device@3.7/fake/" + id);
@@ -112,10 +112,9 @@ Return<void> FakeCameraProvider::isSetTorchModeSupported(
 }
 
 Return<void> FakeCameraProvider::getCameraDeviceInterface_V1_x(
-    const hidl_string& /*cameraDeviceName*/,
+    const hidl_string&,
     getCameraDeviceInterface_V1_x_cb _hidl_cb)
 {
-    // V1 devices not supported
     _hidl_cb(Status::OPERATION_NOT_SUPPORTED, nullptr);
     return Void();
 }
@@ -125,9 +124,8 @@ Return<void> FakeCameraProvider::getCameraDeviceInterface_V3_x(
     getCameraDeviceInterface_V3_x_cb _hidl_cb)
 {
     std::string name = cameraDeviceName;
-    // Extract camera ID from "device@3.x/fake/<id>"
     std::string id = name;
-    auto pos = id.rfind(/);
+    auto pos = id.rfind('/');
     if (pos != std::string::npos) id = id.substr(pos + 1);
 
     auto it = devices_.find(id);
@@ -175,7 +173,7 @@ Return<void> FakeCameraProvider::isConcurrentStreamCombinationSupported_2_7(
 }
 
 void FakeCameraProvider::instantiate(const std::string& videoFilePath) {
-    ::android::hardware::configureRpcThreadpool(8, true /*callerWillJoin*/);
+    ::android::hardware::configureRpcThreadpool(8, true);
 
     ::android::sp<FakeCameraProvider> provider = new FakeCameraProvider(videoFilePath);
 

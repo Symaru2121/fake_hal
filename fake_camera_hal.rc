@@ -1,5 +1,8 @@
 service fake_camera_hal /vendor/bin/hw/android.hardware.camera.provider-fake \
     /data/local/tmp/fake_video.mp4
+    interface android.hardware.camera.provider@2.4::ICameraProvider fake/0
+    interface android.hardware.camera.provider@2.5::ICameraProvider fake/0
+    interface android.hardware.camera.provider@2.6::ICameraProvider fake/0
     interface android.hardware.camera.provider@2.7::ICameraProvider fake/0
     class hal
     user cameraserver

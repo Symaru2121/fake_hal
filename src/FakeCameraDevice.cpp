@@ -17,6 +17,7 @@
 #include <cutils/native_handle.h>
 #endif
 
+#undef LOG_TAG
 #define LOG_TAG "FakeHAL_Device"
 #include <log/log.h>
 
@@ -299,7 +300,7 @@ FakeCameraDevice::FakeCameraDevice(const std::string& cameraId,
 }
 
 Return<void> FakeCameraDevice::getResourceCost(getResourceCost_cb _hidl_cb) {
-    V3_2::CameraResourceCost cost;
+    ::android::hardware::camera::common::V1_0::CameraResourceCost cost;
     cost.resourceCost = 50;
     _hidl_cb(Status::OK, cost);
     return Void();
@@ -477,9 +478,9 @@ void FakeCameraDeviceSession::doConfigureStreams(
         if (s.v3_2.format == static_cast<PixelFormatHidl>(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED)) {
             hs.v3_3.v3_2.overrideFormat = static_cast<PixelFormatHidl>(HAL_PIXEL_FORMAT_YCbCr_420_888);
         }
-        hs.v3_3.v3_2.producerUsage = static_cast<BufferUsageHidl>(
+        hs.v3_3.v3_2.producerUsage = static_cast<uint64_t>(
             GRALLOC1_PRODUCER_USAGE_CAMERA | GRALLOC1_PRODUCER_USAGE_CPU_WRITE_OFTEN);
-        hs.v3_3.v3_2.consumerUsage = static_cast<BufferUsageHidl>(0);
+        hs.v3_3.v3_2.consumerUsage = 0;
         hs.v3_3.v3_2.maxBuffers = 4;
         hs.v3_3.overrideDataSpace = s.v3_2.dataSpace;
         hs.physicalCameraId = s.physicalCameraId;
@@ -768,14 +769,8 @@ bool FakeCameraDeviceSession::writeJPEGToBuffer(
 {
     if (!handle || !nv21 || width <= 0 || height <= 0) return false;
 
-    int32_t blobBufSize = 0;
-    for (const auto& s : activeStreams_) {
-        if (s.v3_2.format == static_cast<PixelFormatHidl>(HAL_PIXEL_FORMAT_BLOB)) {
-            blobBufSize = s.v3_2.bufferSize;
-            break;
-        }
-    }
-    if (blobBufSize <= 0) blobBufSize = width * height * 3 / 2;
+    // HIDL V3.2 Stream doesn't have bufferSize field - estimate from dimensions
+    int32_t blobBufSize = width * height * 3 / 2;
 
     JpegEncoder::ExifData exif;
     exif.iso = (int)meta.getCurrentISO();
