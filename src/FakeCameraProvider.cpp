@@ -1,9 +1,8 @@
 #include "FakeCameraProvider.h"
 #include "FakeCameraDevice.h"
 
-#include <aidl/android/hardware/camera/common/Status.h>
-#include <android/binder_manager.h>
-#include <android/binder_process.h>
+#include <android/hardware/camera/common/1.0/types.h>
+#include <hidl/HidlTransportSupport.h>
 
 #include <cstdio>
 #include <cstring>
@@ -15,19 +14,19 @@
 
 namespace fake_hal {
 
+using ::android::hardware::camera::common::V1_0::Status;
+
 const std::vector<std::string> FakeCameraProvider::kCameraIds = {"0", "1"};
 
 std::string FakeCameraProvider::readDeviceSerial() {
-
     char buf[64] = {};
     FILE* f = fopen("/sys/devices/soc0/serial_number", "r");
     if (f) {
         if (fgets(buf, sizeof(buf), f)) {
             fclose(f);
-
             size_t len = strlen(buf);
-            while (len > 0 && (buf[len-1] == '\n' || buf[len-1] == '\r'))
-                buf[--len] = '\0';
+            while (len > 0 && (buf[len-1] == n || buf[len-1] == r))
+                buf[--len] = 0;
             if (len > 0) return buf;
         } else {
             fclose(f);
@@ -35,11 +34,9 @@ std::string FakeCameraProvider::readDeviceSerial() {
     }
 
 #ifdef __ANDROID__
-
     char prop[92] = {};
     if (__system_property_get("ro.serialno", prop) > 0) return prop;
 #endif
-
 
     std::ifstream idFile("/data/misc/fake_hal_id");
     if (idFile.good()) {
@@ -64,16 +61,14 @@ FakeCameraProvider::FakeCameraProvider(const std::string& videoFilePath)
     : videoFilePath_(videoFilePath)
     , noiseOverlay_(3.0f, 0.35f)
 {
-
     std::string serial = readDeviceSerial();
     std::string model  = readDeviceProp("ro.product.model");
     noiseOverlay_.setSensorFingerprint(serial, model);
     ALOGI("FakeCameraProvider: FPN fingerprint set for device %s",
           serial.substr(0, 4).c_str());
 
-
     for (const auto& id : kCameraIds) {
-        devices_[id] = ndk::SharedRefBase::make<FakeCameraDevice>(id, videoFilePath_);
+        devices_[id] = new FakeCameraDevice(id, videoFilePath_);
     }
     ALOGI("FakeCameraProvider: initialized with video: %s", videoFilePath_.c_str());
 }
@@ -82,95 +77,116 @@ FakeCameraProvider::~FakeCameraProvider() {
     ALOGI("FakeCameraProvider: destroyed");
 }
 
-ndk::ScopedAStatus FakeCameraProvider::setCallback(
-    const std::shared_ptr<ICameraProviderCallback>& callback)
+Return<Status> FakeCameraProvider::setCallback(
+    const ::android::sp<ICameraProviderCallback>& callback)
 {
     std::lock_guard<std::mutex> lk(callbackMutex_);
     callback_ = callback;
     ALOGI("FakeCameraProvider: setCallback registered");
-    return ndk::ScopedAStatus::ok();
+    return Status::OK;
 }
 
-ndk::ScopedAStatus FakeCameraProvider::getVendorTags(
-    std::vector<VendorTagSection>* vts)
-{
-    vts->clear();
-    return ndk::ScopedAStatus::ok();
+Return<void> FakeCameraProvider::getVendorTags(getVendorTags_cb _hidl_cb) {
+    hidl_vec<VendorTagSection> sections;
+    _hidl_cb(Status::OK, sections);
+    return Void();
 }
 
-ndk::ScopedAStatus FakeCameraProvider::getCameraIdList(
-    std::vector<std::string>* cameraIds)
-{
-    *cameraIds = kCameraIds;
-    ALOGI("FakeCameraProvider: getCameraIdList -> [%s]",
-          kCameraIds.size() == 2 ? "0, 1" : "0");
-    return ndk::ScopedAStatus::ok();
+Return<void> FakeCameraProvider::getCameraIdList(getCameraIdList_cb _hidl_cb) {
+    // Return fully qualified device names: device@3.7/fake/<id>
+    std::vector<hidl_string> deviceNames;
+    for (const auto& id : kCameraIds) {
+        deviceNames.push_back("device@3.7/fake/" + id);
+    }
+    hidl_vec<hidl_string> names(deviceNames);
+    ALOGI("FakeCameraProvider: getCameraIdList -> %zu devices", deviceNames.size());
+    _hidl_cb(Status::OK, names);
+    return Void();
 }
 
-ndk::ScopedAStatus FakeCameraProvider::getCameraDeviceInterface(
-    const std::string& cameraDeviceName,
-    std::shared_ptr<ICameraDevice>* device)
+Return<void> FakeCameraProvider::isSetTorchModeSupported(
+    isSetTorchModeSupported_cb _hidl_cb)
 {
+    _hidl_cb(Status::OK, true);
+    return Void();
+}
 
-    std::string id = cameraDeviceName;
+Return<void> FakeCameraProvider::getCameraDeviceInterface_V1_x(
+    const hidl_string& /*cameraDeviceName*/,
+    getCameraDeviceInterface_V1_x_cb _hidl_cb)
+{
+    // V1 devices not supported
+    _hidl_cb(Status::OPERATION_NOT_SUPPORTED, nullptr);
+    return Void();
+}
 
-    auto pos = id.rfind('/');
+Return<void> FakeCameraProvider::getCameraDeviceInterface_V3_x(
+    const hidl_string& cameraDeviceName,
+    getCameraDeviceInterface_V3_x_cb _hidl_cb)
+{
+    std::string name = cameraDeviceName;
+    // Extract camera ID from "device@3.x/fake/<id>"
+    std::string id = name;
+    auto pos = id.rfind(/);
     if (pos != std::string::npos) id = id.substr(pos + 1);
 
     auto it = devices_.find(id);
     if (it == devices_.end()) {
-        ALOGE("FakeCameraProvider: unknown camera id: %s", cameraDeviceName.c_str());
-        return ndk::ScopedAStatus::fromServiceSpecificError(
-            static_cast<int32_t>(::aidl::android::hardware::camera::common::Status::ILLEGAL_ARGUMENT));
+        ALOGE("FakeCameraProvider: unknown camera id: %s", name.c_str());
+        _hidl_cb(Status::ILLEGAL_ARGUMENT, nullptr);
+        return Void();
     }
 
-    *device = it->second;
-    ALOGI("FakeCameraProvider: getCameraDeviceInterface(%s) -> OK", id.c_str());
-    return ndk::ScopedAStatus::ok();
+    ALOGI("FakeCameraProvider: getCameraDeviceInterface_V3_x(%s) -> OK", id.c_str());
+    _hidl_cb(Status::OK, it->second);
+    return Void();
 }
 
-ndk::ScopedAStatus FakeCameraProvider::notifyDeviceStateChange(int64_t deviceState) {
-    ALOGI("FakeCameraProvider: notifyDeviceStateChange(0x%lx)", (long)deviceState);
-    return ndk::ScopedAStatus::ok();
-}
-
-ndk::ScopedAStatus FakeCameraProvider::getConcurrentCameraIds(
-    std::vector<ConcurrentCameraIdCombination>* concurrentCameraIds)
+Return<void> FakeCameraProvider::notifyDeviceStateChange(
+    ::android::hardware::hidl_bitfield<DeviceState> newState)
 {
-    concurrentCameraIds->clear();
-    return ndk::ScopedAStatus::ok();
+    ALOGI("FakeCameraProvider: notifyDeviceStateChange(0x%lx)", (long)newState);
+    return Void();
 }
 
-ndk::ScopedAStatus FakeCameraProvider::isConcurrentStreamCombinationSupported(
-    const std::vector<CameraIdAndStreamCombination>&,
-    bool* support)
+Return<void> FakeCameraProvider::getConcurrentStreamingCameraIds(
+    getConcurrentStreamingCameraIds_cb _hidl_cb)
 {
-    *support = false;
-    return ndk::ScopedAStatus::ok();
+    hidl_vec<hidl_vec<hidl_string>> combinations;
+    _hidl_cb(Status::OK, combinations);
+    return Void();
 }
 
+Return<void> FakeCameraProvider::isConcurrentStreamCombinationSupported(
+    const hidl_vec<
+        ::android::hardware::camera::provider::V2_6::CameraIdAndStreamCombination>&,
+    isConcurrentStreamCombinationSupported_cb _hidl_cb)
+{
+    _hidl_cb(Status::OK, false);
+    return Void();
+}
+
+Return<void> FakeCameraProvider::isConcurrentStreamCombinationSupported_2_7(
+    const hidl_vec<CameraIdAndStreamCombination>&,
+    isConcurrentStreamCombinationSupported_2_7_cb _hidl_cb)
+{
+    _hidl_cb(Status::OK, false);
+    return Void();
+}
 
 void FakeCameraProvider::instantiate(const std::string& videoFilePath) {
-    ABinderProcess_setThreadPoolMaxThreadCount(4);
+    ::android::hardware::configureRpcThreadpool(8, true /*callerWillJoin*/);
 
-    auto provider = ndk::SharedRefBase::make<FakeCameraProvider>(videoFilePath);
+    ::android::sp<FakeCameraProvider> provider = new FakeCameraProvider(videoFilePath);
 
-    const std::string serviceName =
-        std::string(ICameraProvider::descriptor) + "/fake/0";
-
-    binder_status_t status = AServiceManager_addService(
-        provider->asBinder().get(),
-        serviceName.c_str()
-    );
-
-    if (status != STATUS_OK) {
-        ALOGE("FakeCameraProvider: failed to register service '%s': %d",
-              serviceName.c_str(), status);
+    android::status_t status = provider->registerAsService("fake/0");
+    if (status != android::OK) {
+        ALOGE("FakeCameraProvider: failed to register service: %d", status);
         return;
     }
 
-    ALOGI("FakeCameraProvider: registered as '%s'", serviceName.c_str());
-    ABinderProcess_joinThreadPool();
+    ALOGI("FakeCameraProvider: registered as fake/0");
+    ::android::hardware::joinRpcThreadpool();
 }
 
-}
+} // namespace fake_hal

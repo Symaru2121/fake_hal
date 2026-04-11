@@ -1,5 +1,4 @@
 
-
 cc_binary {
     name: "android.hardware.camera.provider-fake",
 
@@ -19,40 +18,49 @@ cc_binary {
     local_include_dirs: ["include"],
 
     shared_libs: [
+        // HIDL camera interfaces
+        "android.hardware.camera.provider@2.4",
+        "android.hardware.camera.provider@2.5",
+        "android.hardware.camera.provider@2.6",
+        "android.hardware.camera.provider@2.7",
+        "android.hardware.camera.device@3.2",
+        "android.hardware.camera.device@3.3",
+        "android.hardware.camera.device@3.4",
+        "android.hardware.camera.device@3.5",
+        "android.hardware.camera.device@3.6",
+        "android.hardware.camera.device@3.7",
+        "android.hardware.camera.common@1.0",
+        "android.hardware.graphics.common@1.0",
 
-        "android.hardware.camera.provider-V1-ndk",
-        "android.hardware.camera.device-V1-ndk",
-        "android.hardware.camera.common-V1-ndk",
+        // HIDL base
+        "libhidlbase",
+        "libhidltransport",
+        "libhwbinder",
+        "libfmq",
 
-
-        "libbinder_ndk",
+        // Core libs
         "libbase",
         "liblog",
         "libutils",
         "libcutils",
 
-
+        // Camera metadata
         "libcamera_metadata",
 
-
+        // Media
         "libmediandk",
 
-
+        // JPEG
         "libjpeg",
 
-
+        // Hardware
         "libhardware",
         "libnativewindow",
         "libvndksupport",
 
-
+        // Gralloc
         "android.hardware.graphics.mapper@4.0",
-
-
         "android.hardware.graphics.mapper@3.0",
-
-
-        "libhidlbase",
     ],
 
     cflags: [
@@ -61,20 +69,15 @@ cc_binary {
         "-Werror",
         "-std=c++17",
         "-O2",
-
         "-fvisibility=hidden",
-
         "-fstack-protector-strong",
     ],
 
-
     vendor: true,
-
 
     init_rc: ["fake_camera_hal.rc"],
     vintf_fragments: ["fake_camera_hal.xml"],
 }
-
 
 cc_library_static {
     name: "libfake_hal_core",

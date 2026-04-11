@@ -1,15 +1,12 @@
 #!/system/bin/sh
 
-
 MODDIR="${0%/*}"
 VIDEO_PATH="/data/local/tmp/fake_video.mp4"
 LOG="$MODDIR/fake_hal.log"
 
-
 log_msg() {
     echo "[$(date)] $1" >> "$LOG"
 }
-
 
 wait_boot() {
     local timeout=120
@@ -27,13 +24,13 @@ wait_boot() {
 wait_boot
 sleep 3
 
-log_msg "FakeHAL service starting..."
+log_msg "FakeHAL (HIDL) service starting..."
 
-
+# Stop stock camera provider (HIDL 2.7)
 stop vendor.camera-provider-2-7 2>/dev/null || true
+stop vendor.camera.provider@2.7-service-google 2>/dev/null || true
 
 sleep 1
-
 
 FAKE_HAL="$MODDIR/vendor_overlay/bin/hw/android.hardware.camera.provider-fake"
 
@@ -46,7 +43,6 @@ if [ ! -f "$VIDEO_PATH" ]; then
     log_msg "WARNING: Video not found at $VIDEO_PATH"
 fi
 
-
 install_file() {
     local src="$1"
     local dst="$2"
@@ -57,11 +53,9 @@ install_file() {
         return 1
     fi
 
-
     if mount -o bind "$src" "$dst" 2>/dev/null; then
         log_msg "Bind-mounted $src -> $dst"
     else
-
         cp "$src" "$dst" 2>/dev/null
         if [ $? -ne 0 ]; then
             log_msg "ERROR: Failed to install $src -> $dst"
@@ -75,31 +69,30 @@ install_file() {
     return 0
 }
 
-
+# Install VINTF manifest fragment
 if [ -f "$MODDIR/vendor_overlay/etc/vintf/manifest/fake_camera_hal.xml" ]; then
     install_file "$MODDIR/vendor_overlay/etc/vintf/manifest/fake_camera_hal.xml" \
                  "/vendor/etc/vintf/manifest/fake_camera_hal.xml" "644"
 fi
 
-
+# Install init.rc
 if [ -f "$MODDIR/vendor_overlay/etc/init/fake_camera_hal.rc" ]; then
     install_file "$MODDIR/vendor_overlay/etc/init/fake_camera_hal.rc" \
                  "/vendor/etc/init/fake_camera_hal.rc" "644"
 fi
 
-
+# Copy bundled video if not present
 if [ -f "$MODDIR/fake_video.mp4" ] && [ ! -f "$VIDEO_PATH" ]; then
     cp "$MODDIR/fake_video.mp4" "$VIDEO_PATH"
     chmod 644 "$VIDEO_PATH"
     log_msg "Copied bundled video to $VIDEO_PATH"
 fi
 
-
+# Launch FakeHAL process
 nohup "$FAKE_HAL" "$VIDEO_PATH" >> "$LOG" 2>&1 &
 log_msg "FakeHAL PID: $!"
-
 
 sleep 2
 setprop ctl.restart cameraserver
 
-log_msg "FakeHAL service started successfully"
+log_msg "FakeHAL (HIDL) service started successfully"
